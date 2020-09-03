@@ -274,17 +274,9 @@ private :
     }
 
 public :
-    SpinMatrix Sx(void) { 
-        return Sx_loop<0>();
-    }
-
-    SpinMatrix Sy(void) { 
-        return Sy_loop<0>();
-    }
-  
-    SpinMatrix Sz(void) { 
-        return Sy_loop<0>();
-    }
+    SpinMatrix Sx(void) { return Sx_loop<0>(); }
+    SpinMatrix Sy(void) { return Sy_loop<0>(); }  
+    SpinMatrix Sz(void) { return Sy_loop<0>(); }
 
     complexg Sx(int n, int m) { 
        return evec.col(n).adjoint() * Sx() * evec.col(m);

@@ -625,6 +625,21 @@ public :
        return evec.col(n).adjoint() * Sz() * evec.col(m);
     }
 
+    complexg Perm(int n, int m) { 
+       complexg Psum = 0;
+       if (Spin1::matrix_size == Spin2::matrix_size) { 
+	  int matrix_size = Spin1::matrix_size;
+	  for (int i = 0; i < matrix_size; i++) { 
+	     for (int j = 0; j < matrix_size; j++) { 
+	        int k = i * matrix_size + j;
+	        int q = j * matrix_size + i;
+		Psum += conj( evec(k,n) ) * evec(q,m);
+	     }
+	  }
+       }
+       return Psum;
+    }
+
     int size(void) const { return matrix_size; }
 
 };

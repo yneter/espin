@@ -224,7 +224,7 @@ private:
        zero.setZero();
     }
 public :
-    int size(void) { return matrix_size; }
+    int size(void) const { return matrix_size; }
 
     int nspins(void) const { return Svec.size(); }
 
@@ -254,7 +254,7 @@ public :
        spin_size_list(spins);
     } 
 
-    int find_left_matrix_size(int i) { 
+    int find_left_matrix_size(int i) const { 
        int s = 1;
        for (int j = 0; j < i; j++) { 
 	  s *= Svec[j].size();
@@ -262,11 +262,11 @@ public :
        return s;
     };
 
-    int find_item_matrix_size(int i) { 
+    int find_item_matrix_size(int i) const { 
        return Svec[i].size();
     }
 
-    template <typename Matrix> Matrix make_matrix_Hi(int i, const Matrix &Hi) { 
+    template <typename Matrix> Matrix make_matrix_Hi(int i, const Matrix &Hi) const { 
        int size_left = find_left_matrix_size(i);
        int size_i = find_item_matrix_size(i);
        int size_right = matrix_size / (size_left * size_i);
@@ -280,7 +280,7 @@ public :
     } 
 
 
-    SpinMatrix make_matrix_HiHj(int I, SpinMatrix Hi, int J, SpinMatrix Hj ) { 
+    SpinMatrix make_matrix_HiHj(int I, SpinMatrix Hi, int J, SpinMatrix Hj ) const { 
        int size_I_left = find_left_matrix_size(I);
        int size_I = find_item_matrix_size(I);
        int size_J_left = find_left_matrix_size(J);
@@ -305,28 +305,28 @@ public :
     SpinSparse &S(int i) { return Svec[i]; }
     const SpinSparse &Sconst(int i) const { return Svec[i]; }
 
-    SpinMatrixReal rSx(int i) { return make_matrix_Hi<SpinMatrixReal>(i, Svec[i].rSx()); }
-    SpinMatrixReal iSy(int i) { return make_matrix_Hi<SpinMatrixReal>(i, Svec[i].iSy()); }
-    SpinMatrixReal rSz(int i) { return make_matrix_Hi<SpinMatrixReal>(i, Svec[i].rSz()); }
-    SpinMatrixReal rSp(int i) { return make_matrix_Hi<SpinMatrixReal>(i, Svec[i].rSp()); }
-    SpinMatrixReal rSm(int i) { return make_matrix_Hi<SpinMatrixReal>(i, Svec[i].rSm()); }
-    SpinMatrix Sx(int i) { return make_matrix_Hi<SpinMatrix>(i, Svec[i].Sx()); }
-    SpinMatrix Sy(int i) { return make_matrix_Hi<SpinMatrix>(i, Svec[i].Sy()); }
-    SpinMatrix Sz(int i) { return make_matrix_Hi<SpinMatrix>(i, Svec[i].Sz()); }
-    SpinMatrix Sp(int i) { return make_matrix_Hi<SpinMatrix>(i, Svec[i].Sp()); }
-    SpinMatrix Sm(int i) { return make_matrix_Hi<SpinMatrix>(i, Svec[i].Sm()); }
+    SpinMatrixReal rSx(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Svec[i].rSx()); }
+    SpinMatrixReal iSy(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Svec[i].iSy()); }
+    SpinMatrixReal rSz(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Svec[i].rSz()); }
+    SpinMatrixReal rSp(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Svec[i].rSp()); }
+    SpinMatrixReal rSm(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Svec[i].rSm()); }
+    SpinMatrix Sx(int i) const { return make_matrix_Hi<SpinMatrix>(i, Svec[i].Sx()); }
+    SpinMatrix Sy(int i) const { return make_matrix_Hi<SpinMatrix>(i, Svec[i].Sy()); }
+    SpinMatrix Sz(int i) const { return make_matrix_Hi<SpinMatrix>(i, Svec[i].Sz()); }
+    SpinMatrix Sp(int i) const { return make_matrix_Hi<SpinMatrix>(i, Svec[i].Sp()); }
+    SpinMatrix Sm(int i) const { return make_matrix_Hi<SpinMatrix>(i, Svec[i].Sm()); }
 
-    const SpinMatrixReal& rId(void) { return rid; } 
-    const SpinMatrixReal& rZero(void) { return rzero; } 
-    const SpinMatrix& Id(void) { return id; } 
-    const SpinMatrix& Zero(void) { return zero; } 
+    const SpinMatrixReal& rId(void) const { return rid; } 
+    const SpinMatrixReal& rZero(void) const { return rzero; } 
+    const SpinMatrix& Id(void) const { return id; } 
+    const SpinMatrix& Zero(void) const { return zero; } 
     
-    SpinMatrixReal rSx(void) { SpinMatrixReal srSx = rZero(); for (int s = 0; s < nspins(); s++) srSx += rSx(s); return srSx; }
-    SpinMatrixReal iSy(void) { SpinMatrixReal siSy = rZero(); for (int s = 0; s < nspins(); s++) siSy += iSy(s); return siSy; }
-    SpinMatrixReal rSz(void) { SpinMatrixReal srSz = rZero(); for (int s = 0; s < nspins(); s++) srSz += rSz(s); return srSz; }
-    SpinMatrix Sx(void) { SpinMatrix sSx = Zero(); for (int s = 0; s < nspins(); s++) sSx += Sx(s); return sSx; }
-    SpinMatrix Sy(void) { SpinMatrix sSy = Zero(); for (int s = 0; s < nspins(); s++) sSy += Sy(s); return sSy; }
-    SpinMatrix Sz(void) { SpinMatrix sSz = Zero(); for (int s = 0; s < nspins(); s++) sSz += Sz(s); return sSz; }
+    SpinMatrixReal rSx(void) const { SpinMatrixReal srSx = rZero(); for (int s = 0; s < nspins(); s++) srSx += rSx(s); return srSx; }
+    SpinMatrixReal iSy(void) const { SpinMatrixReal siSy = rZero(); for (int s = 0; s < nspins(); s++) siSy += iSy(s); return siSy; }
+    SpinMatrixReal rSz(void) const { SpinMatrixReal srSz = rZero(); for (int s = 0; s < nspins(); s++) srSz += rSz(s); return srSz; }
+    SpinMatrix Sx(void) const { SpinMatrix sSx = Zero(); for (int s = 0; s < nspins(); s++) sSx += Sx(s); return sSx; }
+    SpinMatrix Sy(void) const { SpinMatrix sSy = Zero(); for (int s = 0; s < nspins(); s++) sSy += Sy(s); return sSy; }
+    SpinMatrix Sz(void) const { SpinMatrix sSz = Zero(); for (int s = 0; s < nspins(); s++) sSz += Sz(s); return sSz; }
 
 
 
