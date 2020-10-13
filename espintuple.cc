@@ -274,9 +274,30 @@ private :
     }
 
 public :
+    int size(void) const { return matrix_size; }
     SpinMatrix Sx(void) { return Sx_loop<0>(); }
     SpinMatrix Sy(void) { return Sy_loop<0>(); }  
-    SpinMatrix Sz(void) { return Sy_loop<0>(); }
+    SpinMatrix Sz(void) { return Sz_loop<0>(); }
+    SpinMatrix S2(void) { return Sx()*Sx() + Sy()*Sy() + Sz()*Sz(); }
+    SpinMatrix Jproj(double J) { 
+       SpinVectorReal Jeval;   // eigenvalues
+       SpinMatrix Jevec; // eigenvectors
+       SelfAdjointEigenSolver<SpinMatrix> eigensolver( S2() );
+       double J2 = J*(J+1.);
+       if (eigensolver.info() != Success) abort();
+       Jeval = eigensolver.eigenvalues();
+       Jevec = eigensolver.eigenvectors();
+       //       std::cerr << "# S2 diag " << (S2() - Jevec * Jeval.asDiagonal() * Jevec.adjoint()).norm() << std::endl;
+       //       std::cerr << Jeval << std::endl;
+       for (int n = 0; n < size(); n++) { 
+	  if (fabs(Jeval(n) - J2) < 1e-5) { 
+	     Jeval(n) = 1.0;
+	  } else { 
+	     Jeval(n) = 0.0;
+	  }
+       }
+       return Jevec * Jeval.asDiagonal() * Jevec.adjoint();
+    }
 
     complexg Sx(int n, int m) { 
        return evec.col(n).adjoint() * Sx() * evec.col(m);
@@ -290,6 +311,10 @@ public :
        return evec.col(n).adjoint() * Sz() * evec.col(m);
     }
 
+    complexg matrix_elem(const SpinMatrix &M, int n, int m) { 
+       return evec.col(n).adjoint() * M * evec.col(m);
+    }
+
     void update_hamiltonian(void) { 
        load_uncoupled_hamiltonian();
        if (dipole_dipole_enabled) { 
@@ -300,7 +325,6 @@ public :
        }
     }
 
-    int size(void) const { return matrix_size; }
 };
 
 
