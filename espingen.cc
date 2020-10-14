@@ -165,9 +165,6 @@ public :
     }
 
     void random(void) { 
-      //       M = AngleAxis<double> ( 2.0 * M_PI * myrand(), random_unit_vector() );
-      //       mat2euler(M, angles);
-
       double theta = acos( 2.0 * myrand() - 1.0 );
       double phi1 = 2.0 * M_PI * myrand();
       double phi2 = 2.0 * M_PI * myrand();      

@@ -63,6 +63,7 @@ public :
 
 
 
+
 struct SpinTupleInCavity  { 
     std::vector<double> Bz;
     std::vector<double> Omega;
