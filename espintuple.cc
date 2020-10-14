@@ -275,6 +275,8 @@ private :
 
 public :
     int size(void) const { return matrix_size; }
+    int nspins(void) const { return spin_number; } 
+
     SpinMatrix Sx(void) { return Sx_loop<0>(); }
     SpinMatrix Sy(void) { return Sy_loop<0>(); }  
     SpinMatrix Sz(void) { return Sz_loop<0>(); }
