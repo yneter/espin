@@ -1,4 +1,6 @@
 #include "espindense.cc"
+#include <Eigen/Sparse>
+
 
 #ifndef ESPINODMR
 #define ESPINODMR
@@ -244,13 +246,18 @@ template <class SpinSystem> class Merrifield :public Eigen::EigenBase< Merrifiel
 public:
     double gammaS;
     double gamma;
+    double alphaS;
+    double alpha;
 
     // Required typedefs, constants, and method:
     typedef complexg Scalar;
     typedef double RealScalar;
     typedef int StorageIndex;
+
+    enum { master_size = SpinSystem::matrix_size * SpinSystem::matrix_size };
+    enum { matrix_size = SpinSystem::matrix_size };
     typedef Matrix<complexg, SpinSystem::matrix_size, SpinSystem::matrix_size> SpinMatrix;
-    typedef Matrix<complexg, SpinSystem::matrix_size*SpinSystem::matrix_size, 1> SpinMatrixVecForm;
+    typedef Matrix<complexg, master_size, 1> SpinMatrixVecForm;
     SpinMatrix rho;
     SpinMatrix Ps;
 
@@ -264,7 +271,13 @@ public:
     Index rows() const { return SpinSystem::matrix_size * SpinSystem::matrix_size; }
     Index cols() const { return SpinSystem::matrix_size * SpinSystem::matrix_size; } 
 
-  
+    typedef Matrix<complexg, master_size, master_size> LiouvilleMatrix;
+    int enc_master(int n, int m) { 
+       return m * SpinSystem::matrix_size + n;
+    }
+    LiouvilleMatrix liouville_full_matrix;    
+  //    SparseMatrix<complexg>  liouville_sparse_matrix;    
+
     template<typename Rhs>
     Eigen::Product<Merrifield<SpinSystem>,Rhs,Eigen::AliasFreeProduct> 
     operator*(const Eigen::MatrixBase<Rhs>& x) const {
@@ -274,13 +287,14 @@ public:
 
     Merrifield(SpinSystem &spin_system) : spins(spin_system) {
        Ps = spins.singlet_projector();
-       rho_initialized = false;
+       rho_initialized = false;       
+       //       liouville_sparse_matrix.resize(master_size, master_size);
     }
 private : 
-    double trace_rho_Ps(void) { 
+    double trace_rho_Ps(const SpinMatrix &mrho) { 
 	Matrix<complexg, 1, 1> sum;
 	for (int i = 0; i < SpinSystem::matrix_size; i++) {
- 	   sum += Ps.row(i) * rho.col(i);
+ 	   sum += Ps.row(i) * mrho.col(i);
 	}
 	return real(sum(0));
     }
@@ -290,10 +304,9 @@ private :
 public  : 
 
     SpinMatrix Liouvillian(const SpinMatrix &rho) const { 
-      SpinMatrix L = -iii * ( spins.hamiltonian() * rho - rho * spins.hamiltonian() )
+      return -iii * ( spins.hamiltonian() * rho - rho * spins.hamiltonian() )
 	- gamma * rho
-	- gammaS * (Ps * rho + rho * Ps);
-      return L;
+	- 0.5 * gammaS * (Ps * rho + rho * Ps);
     }
 
 
@@ -301,7 +314,7 @@ public  :
         return Map< SpinMatrix >(vec.data());
     }
 
-    SpinMatrixVecForm map_to_vec(SpinMatrix &mat) const { 
+    SpinMatrixVecForm map_to_vec(SpinMatrix mat) const { 
         return Map< SpinMatrixVecForm > (mat.data());
     }
 
@@ -346,14 +359,94 @@ public  :
 	rho_initialized = true;
     }
 
+    const LiouvilleMatrix &update_liouville_matrix(void) { 
+        spins.update_hamiltonian();
+	liouville_full_matrix.setZero();
+	//	liouville_sparse_matrix.setZero();
+	//	std::vector< Triplet<complexg> > coef;      
+       
+	const SpinMatrix &H = spins.hamiltonian();
+	for (int n=0; n< matrix_size; n++) { 
+	   for (int m=0; m< matrix_size; m++) { 
+	      for (int c=0; c< matrix_size; c++) { 
+	       // d rho(n, c)/dt = -i H(n, m) rho(m, c) 
+		liouville_full_matrix( enc_master(n, c), enc_master(m, c)) -= iii * H(n, m);
+	       // d rho(c, m)/dt = i rho(c, n) H(n, m) 
+		liouville_full_matrix( enc_master(c, m), enc_master(c, n)) += iii * H(n, m);
+		/**
+		if ( H(n, m) != complex<double>(0, 0) ) { 
+		   coef.push_back( Triplet<complexg>( enc_master(n, c), enc_master(m, c) , - iii * H(n, m) ) );
+		   coef.push_back( Triplet<complexg>( enc_master(c, m), enc_master(c, n) , + iii * H(n, m) ) );
+		}
+		**/
+	       // d rho(n, c)/dt = -gammaS PS(n, m) rho(m, c) 
+		liouville_full_matrix( enc_master(n, c), enc_master(m, c)) -= 0.5 * gammaS * Ps(n, m);
+	       // d rho(c, m)/dt = -gammaS rho(c, n) PS(n, m) 
+		liouville_full_matrix( enc_master(c, m), enc_master(c, n)) -= 0.5 * gammaS * Ps(n, m);
+		/**
+		if (Ps(n, m) != complex<double>(0, 0)) { 
+		   coef.push_back( Triplet<complexg>( enc_master(n, c), enc_master(m, c) , - gammaS * Ps(n, m) ) );
+		   coef.push_back( Triplet<complexg>( enc_master(c, m), enc_master(c, n) , - gammaS * Ps(n, m) ) );
+		}
+		**/
+
+	      }	      
+	      //  drho(n, m)/dt = -gamma  rho(n, m)
+	      liouville_full_matrix( enc_master(n, m), enc_master(n, m)) -= gamma;
+	      //	      coef.push_back( Triplet<complexg>( enc_master(n, m), enc_master(n, m) , - gamma ) );
+	   }
+	}      
+
+	//	liouville_sparse_matrix.setFromTriplets(coef.begin(), coef.end());       
+	return liouville_full_matrix;
+    }
+
+    void find_rho_exact(bool sparse = false) { 
+       SpinMatrixVecForm y;
+       y.setZero();
+       for (int n = 0; n < matrix_size; n++) y( enc_master(n, n) ) = -alpha;
+       y -= alphaS * Ps_to_vec();
+
+       SpinMatrixVecForm x;
+
+       update_liouville_matrix();
+
+       x = liouville_full_matrix.lu().solve(y);
+
+       rho = map_to_mat(x);       
+       rho_initialized = true;
+    }
+
+    double odmr(double omega, Vector3d Bac) { 
+       SpinMatrix Vac = Bac(0) * spins.Sx() + Bac(1) * spins.Sy() + Bac(2) * spins.Sz();
+       // solve \partial_t \rho = L \rho - i [ Vac, \rho ] 
+       SpinMatrix rho2; 
+       SpinMatrixVecForm z1;
+       z1 = map_to_vec( -iii * Vac * rho + iii * rho * Vac );
+       LiouvilleMatrix Lp, Lm;
+       Lp = liouville_full_matrix - iii * omega * LiouvilleMatrix::Identity();
+       Lm = liouville_full_matrix + iii * omega * LiouvilleMatrix::Identity();
+       SpinMatrixVecForm xp, xm;
+       xp = Lp.lu().solve(z1);
+       xm = Lm.lu().solve(z1);
+       SpinMatrixVecForm zp2, zm2;
+       zp2 = map_to_vec( -iii * Vac * map_to_mat(xp) + iii * map_to_mat(xp) * Vac );
+       zm2 = map_to_vec( -iii * Vac * map_to_mat(xm) + iii * map_to_mat(xm) * Vac );
+       xp = liouville_full_matrix.lu().solve(zp2);
+       xm = liouville_full_matrix.lu().solve(zm2);
+       rho2 = map_to_mat( xp ) + map_to_mat( xm );
+       return trace_rho_Ps(rho2);
+    }
 
     double rho_error(void) { 
-        return (Liouvillian(rho) + Ps).norm();
+       return (Liouvillian(rho) + alphaS * Ps + alpha * SpinMatrix::Identity()).norm();
     }
 
     double PL(void) { 
-        return trace_rho_Ps();
+       return trace_rho_Ps(rho);
     }
+
+    
 
 
 };

@@ -612,6 +612,19 @@ public :
        return kroneckerProduct(S1.sz, S2.id).eval() + kroneckerProduct(S1.id, S2.sz).eval();
     }
 
+    SpinMatrix Sx(int s) { 
+       if (!s) return kroneckerProduct(S1.sx, S2.id);
+       else return  kroneckerProduct(S1.id, S2.sx);
+    }
+    SpinMatrix Sy(int s) { 
+       if (!s) return kroneckerProduct(S1.sy, S2.id);
+       else return  kroneckerProduct(S1.id, S2.sy);
+    }
+    SpinMatrix Sz(int s) { 
+       if (!s) return kroneckerProduct(S1.sz, S2.id);
+       else return  kroneckerProduct(S1.id, S2.sz);
+    }
+
 
     complexg Sx(int n, int m) { 
        return evec.col(n).adjoint() * Sx() * evec.col(m);
