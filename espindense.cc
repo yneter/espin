@@ -472,7 +472,8 @@ public:
     { 
     }
 
-
+    int size(void) { return matrix_size; }
+  
     const SpinMatrix& update_hamiltonian(void) { 
        return S.update_hamiltonian();
     }
@@ -611,6 +612,7 @@ public :
     SpinMatrix Sz(void) { 
        return kroneckerProduct(S1.sz, S2.id).eval() + kroneckerProduct(S1.id, S2.sz).eval();
     }
+    SpinMatrix S2tot(void) { return Sx()*Sx() + Sy()*Sy() + Sz()*Sz(); }
 
     SpinMatrix Sx(int s) { 
        if (!s) return kroneckerProduct(S1.sx, S2.id);
@@ -638,6 +640,10 @@ public :
        return evec.col(n).adjoint() * Sz() * evec.col(m);
     }
 
+    complexg S2tot(int n, int m) { 
+       return evec.col(n).adjoint() * S2tot() * evec.col(m);
+    }
+  
     complexg Perm(int n, int m) { 
        complexg Psum = 0;
        if (Spin1::matrix_size == Spin2::matrix_size) { 

@@ -313,6 +313,10 @@ public :
        return evec.col(n).adjoint() * Sz() * evec.col(m);
     }
 
+    complexg S2(int n, int m) { 
+       return evec.col(n).adjoint() * S2() * evec.col(m);
+    }
+  
     complexg matrix_elem(const SpinMatrix &M, int n, int m) { 
        return evec.col(n).adjoint() * M * evec.col(m);
     }

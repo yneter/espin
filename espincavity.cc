@@ -6,62 +6,143 @@
 #include <tuple>
 
 class CavitySparse { 
-    SparseMatrix<double> a_matrix;
-    SparseMatrix<double> ap_matrix;
-    SparseMatrix<double> N_matrix;
-    SparseMatrix<double> Id_matrix;
+public:
+    typedef double ecavity_float;
+    typedef SparseMatrix<ecavity_float> CavityMatrix;
+private :
+    CavityMatrix a_matrix;
+    CavityMatrix ap_matrix;
+    CavityMatrix N_matrix;
+    CavityMatrix Id_matrix;
+    CavityMatrix Hfull;
+
 public :
+    double omega_c;
+
     CavitySparse(int N) : 
       a_matrix(N, N),
       ap_matrix(N, N),
       N_matrix(N, N),
-      Id_matrix(N, N)
+      Id_matrix(N, N),
+      Hfull(N, N)
     { 
-      std::vector< Triplet<double> > coef;      
+      std::vector< Triplet<ecavity_float> > coef;      
        for (int i = 0; i < N-1; i++) { 
-	  coef.push_back( Triplet<double>( i, i+1, sqrt(i+1) ) );
+	 coef.push_back( Triplet<ecavity_float>( i, i+1, static_cast<ecavity_float>(sqrt(i+1)) ) );
        }
        a_matrix.setFromTriplets(coef.begin(), coef.end());
 
        coef.clear();
        for (int i = 0; i < N-1; i++) { 
-	  coef.push_back( Triplet<double>( i+1, i, sqrt(i+1) ) );
+	 coef.push_back( Triplet<ecavity_float>( i+1, i, static_cast<ecavity_float>(sqrt(i+1)) ) );
        }
        ap_matrix.setFromTriplets(coef.begin(), coef.end());
 
 
        coef.clear();
        for (int i = 0; i < N; i++) { 
-	  coef.push_back( Triplet<double>( i, i, (double)i ) );
+	  coef.push_back( Triplet<ecavity_float>( i, i, static_cast<ecavity_float>(i) ) );
        }
        N_matrix.setFromTriplets(coef.begin(), coef.end());
        
        Id_matrix.setIdentity();
     }
 
-    int size(void) { 
+    int size(void) const { 
        return Id_matrix.cols();
     }
 
-    const SparseMatrix<double>& a(void) const { 
+    const CavityMatrix& a(void) const { 
        return a_matrix;
     }
 
-    const SparseMatrix<double>& ap(void) const { 
+    const CavityMatrix& ap(void) const { 
        return ap_matrix;
     }
 
-    const SparseMatrix<double>& N(void) const { 
+    const CavityMatrix& N(void) const { 
        return N_matrix;
     }
 
-    const SparseMatrix<double>& Id(void) const {
+    const CavityMatrix& Id(void) const {
        return Id_matrix;
     }
-   
+
+    VectorXcd coherent(complex<double> alpha) { 
+       VectorXcd c(size());
+       c.setZero();
+       if (abs(alpha) < 1e-15 ) {
+	 c(0) = 1;
+       } else { 
+	 double an0 = norm(alpha)/2.0;
+	 for (int i = 0; i < size(); i++) {
+	   c(i) = exp( -an0 + log(alpha) * (double)i - 0.5 * std::lgamma(i+1) );
+	 }
+       }
+       return c;
+    }
+
+    VectorXcd coherent(double alphax, double alphay) { 
+       std::complex<double> alpha(alphax, alphay);
+       return coherent(alpha);
+    }
+    MatrixXcd coherent_rho(complex<double> alpha) { 
+       VectorXcd c = coherent(alpha);
+       return c * c.adjoint();
+    }
+
+    void update_hamiltonian(void) { 
+       Hfull = omega_c * N_matrix;
+    }
+
+    const SparseMatrix<double>& hamiltonian(void) const { 
+       return Hfull;
+    }
+
 };
 
 
+
+//
+// too much code overlap with SpinTupleSparse
+
+struct CavityTupleSparse : public QuantTupleSparse< CavitySparse > { 
+    typedef CavitySparse::CavityMatrix  CavityMatrix;
+private:
+    CavityMatrix Hfull; 
+    CavityMatrix Id_matrix;
+public: 
+
+    CavityTupleSparse(const std::vector<int> &vec) : QuantTupleSparse< CavitySparse >(vec) { 
+       Hfull.resize( size(), size() );
+       Id_matrix.resize( size(), size() );
+       Id_matrix.setIdentity();
+    } 
+
+    CavityMatrix a(int i) const { return make_matrix_Hi<CavityMatrix>(i, quant_sys_const(i).a()); }
+    CavityMatrix ap(int i) const { return make_matrix_Hi<CavityMatrix>(i, quant_sys_const(i).ap()); }
+    CavityMatrix N(int i) const { return make_matrix_Hi<CavityMatrix>(i, quant_sys_const(i).N()); }
+    const CavityMatrix &Id(void) const { return Id_matrix; }
+    
+    CavitySparse &cavity(int i) { return quant_sys(i); }
+    const CavitySparse &cavity_const(int i) const { return quant_sys_const(i); }
+
+    void load_uncoupled_hamiltonian(void) { 
+       Hfull.setZero();
+       for (int s = 0; s < nsys(); s++) {
+	  cavity(s).update_hamiltonian();
+	  Hfull += make_matrix_Hi<CavityMatrix>(s, cavity(s).hamiltonian() );
+       }       
+    }
+
+    void update_hamiltonian(void) { 
+       load_uncoupled_hamiltonian();
+    }
+
+    const CavityMatrix& hamiltonian(void) const { 
+       return Hfull;
+    }
+};
 
 
 struct SpinTupleInCavity  { 
@@ -73,7 +154,7 @@ struct SpinTupleInCavity  {
     typedef SparseMatrix<double> SIC_Matrix;
     SpinTupleSparse S;
     CavitySparse os;
-
+    bool rwa;
 private:
     int matrix_size;
     SIC_Matrix Hfull;
@@ -94,6 +175,7 @@ public:
        matrix_size = S.size() * os.size();
        Hfull.setZero();
        resize_nspins();
+       rwa = true;
     }
 
 
@@ -115,6 +197,9 @@ public:
        Hfull = omegaC * kroneckerProduct(os.N(), S.rId()) + F * ( kroneckerProduct(os.a(), S.rId()) + kroneckerProduct(os.ap(), S.rId()) );
        for (int i = 0; i < S.nspins(); i++) { 
 	  Hfull += ( Bz[i] * kroneckerProduct(os.Id(), S.rSz(i)) + Omega[i] *  ( kroneckerProduct(os.a(), S.rSp(i)) + kroneckerProduct(os.ap(), S.rSm(i))) );
+	  if (!rwa) { 
+	     Hfull += Omega[i] *  ( kroneckerProduct(os.ap(), S.rSp(i)) + kroneckerProduct(os.a(), S.rSm(i))) ;
+	  }
        }
        return Hfull;
     }
@@ -130,7 +215,9 @@ public:
 
 
     complexg trace_AB(const SparseMatrix<double>& A, const MatrixXcd &B) { return (A * B).eval().trace(); }
+    complexg trace_cAB(const SparseMatrix<complexg>& A, const MatrixXcd &B) { return (A * B).eval().trace(); }
     double re_trace_AB(const SparseMatrix<double>& A, const MatrixXcd &B) { return real( trace_AB(A, B) ); }
+    complexg trA(const MatrixXcd &rho) { return trace_AB( kroneckerProduct(os.a(), S.rId()), rho); }
     double trN(const MatrixXcd &rho) { return re_trace_AB( kroneckerProduct(os.N(), S.rId()), rho); }
     double trS2(const MatrixXcd &rho) { return re_trace_AB( kroneckerProduct(os.Id(), S.rSx() * S.rSx() - S.iSy() * S.iSy() + S.rSz() * S.rSz()), rho); }
     double trSx(const MatrixXcd &rho) { return re_trace_AB( kroneckerProduct(os.Id(), S.rSx()), rho); }
@@ -139,6 +226,66 @@ public:
     double trSx(int i, const MatrixXcd &rho) { return re_trace_AB( kroneckerProduct(os.Id(), S.rSx(i)), rho); }
     double trSy(int i, const MatrixXcd &rho) { return imag ( trace_AB( kroneckerProduct(os.Id(), S.iSy(i)), rho) ); }
     double trSz(int i, const MatrixXcd &rho) { return re_trace_AB( kroneckerProduct(os.Id(), S.rSz(i)), rho); }
+    double trBell_spin_cavity(int i, const MatrixXcd &rho) { 
+       SparseMatrix<complexg> MQ = 2. * kroneckerProduct(os.Id(), S.Sz(i));
+       SparseMatrix<complexg> MR = 2. * kroneckerProduct(os.Id(), S.Sx(i));
+       double E = sqrt( trN(rho) + 0.5 );
+       SparseMatrix<complexg> MS = kroneckerProduct(os.a() + os.ap(), S.Id())  / (2. * E); 
+       SparseMatrix<complexg> MT = kroneckerProduct(iii * (os.a() - os.ap()), S.Id())  / (2. * E);
+       return real( trace_cAB(MQ * MS + MR * MS + MR * MT - MQ * MT, rho) );
+    }
+
+
+    double trBell_spin(int i, int j, 
+		       const Vector3d &s1, const Vector3d &s2, 
+		       const Vector3d &s3, const Vector3d &s4, const MatrixXcd &rho) { 
+          Vector3d v1, v2, v3, v4;
+	  v1 = s1;
+	  v2 = s2;
+	  v3 = s3;
+	  v4 = s4;
+	  v1.normalize();
+	  v2.normalize();
+	  v3.normalize();
+	  v4.normalize();
+	  SparseMatrix<complexg> MQ = 2. * kroneckerProduct(os.Id(), v1(0) * S.Sx(i) + v1(1) * S.Sy(i) + v1(2) * S.Sz(i));
+	  SparseMatrix<complexg> MR = 2. * kroneckerProduct(os.Id(), v2(0) * S.Sx(i) + v2(1) * S.Sy(i) + v2(2) * S.Sz(i));
+	  SparseMatrix<complexg> MS = 2. * kroneckerProduct(os.Id(), v3(0) * S.Sx(j) + v3(1) * S.Sy(j) + v3(2) * S.Sz(j));
+	  SparseMatrix<complexg> MT = 2. * kroneckerProduct(os.Id(), v4(0) * S.Sx(j) + v4(1) * S.Sy(j) + v4(2) * S.Sz(j));
+	  return fabs( real( trace_cAB(MQ * MS + MR * MS + MR * MT - MQ * MT, rho) ) );
+    }
+
+    double trBell_spin_random(int i, int j, int Nsample, const MatrixXcd &rho) { 
+       Rotation rot1, rot2;
+       Rotation rot1max, rot2max;
+       Matrix3d r1, r2;
+       double bmax = 0;
+       double b; 
+
+       for (int k=0; k < Nsample; k++) {
+	  rot1.random();
+	  rot2.random();
+	  r1 = rot1.matrix();
+	  r2 = rot2.matrix();
+
+	  b = trBell_spin(i, j, r1.row(0), r1.row(1), r2.row(0), r2.row(1), rho);
+	  if (b > bmax) { 
+	     bmax = b;
+	     rot1max = rot1;
+	     rot2max = rot2;
+	  }
+
+       }
+
+       r1 = rot1max.matrix();
+       r2 = rot2max.matrix();
+       std::cout << "# bmax " << bmax << std::endl;
+       std::cout << "# vector1a " << r1(0,0) << "   " << r1(0,1) << "     " << r1(0,2) << std::endl;
+       std::cout << "# vector1b " << r1(1,0) << "   " << r1(1,1) << "     " << r1(1,2) << std::endl;
+       std::cout << "# vector2a " << r2(0,0) << "   " << r2(0,1) << "     " << r2(0,2) << std::endl;
+       std::cout << "# vector2b " << r2(1,0) << "   " << r2(1,1) << "     " << r2(1,2) << std::endl;
+       return bmax;
+    }
 
 
 
@@ -156,6 +303,32 @@ public:
        std::cout << "# F " << F << std::endl;
        std::cout << "# os size " << os.size() << std::endl;
        std::cout << "# spin size " << S.size() << std::endl;
+       std::cout << "# rwa " << rwa << std::endl;
+    }
+};
+
+
+struct SpinCavityTuple  { 
+    SpinTupleSparse S;
+    CavityTupleSparse os;
+
+    int size(void) { return S.size() * os.size(); }
+private :
+    SparseMatrix<complexg> Hfull;
+public : 
+
+    SpinCavityTuple(std::vector<int> spins, std::vector<int> cavities) : S(spins), os(cavities) {        
+       Hfull.resize( size(), size() );
+    }
+
+    void update_hamiltonian(void) {
+       S.update_hamiltonian();
+       os.update_hamiltonian();
+       Hfull = kroneckerProduct( S.hamiltonian(), os.Id() ).eval() + kroneckerProduct( S.Id(), os.hamiltonian() ).eval();
+    }
+
+    SparseMatrix<complexg> &hamiltonian(void) { 
+       return Hfull; 
     }
 };
 
@@ -175,13 +348,12 @@ namespace internal {
 
 struct SpinTupleInCavityMaster;
 
-struct SpinTupleInCavityMasterTimeDerivative { 
+struct SpinTupleInCavityMasterDt { 
     const SpinTupleInCavityMaster &spin_in_cavity;
     void operator()(const MatrixXcd &x , MatrixXcd &dxdt, double t);
   
-    SpinTupleInCavityMasterTimeDerivative(const SpinTupleInCavityMaster &spin_in_cavity_ref) : 
+    SpinTupleInCavityMasterDt(const SpinTupleInCavityMaster &spin_in_cavity_ref) : 
        spin_in_cavity(spin_in_cavity_ref) { 
-
     }
 };
 
@@ -195,6 +367,7 @@ struct SpinTupleInCavityMaster : public SpinTupleInCavity
     double gamma;
     double nav;
     double gammaS;
+    VectorXd gammaSvec;
     double gammaSup;
     double temp;
 private:
@@ -206,9 +379,10 @@ private:
     std::vector < LindbladOperator > lindblad_operators;    
 
     int master_size;
-    MatrixXcd rho_matr;
     MatrixXcd Jacobi_for_Liouville;
     SparseMatrix<complexg> Master_full;
+
+    MatrixXcd rho_matr;
 public:
     SpinTupleInCavityMaster(int N, std::vector<int> spin_size_list) : SpinTupleInCavity(N, spin_size_list),
 			  rho_matr(SpinTupleInCavity::size(), SpinTupleInCavity::size()),
@@ -283,6 +457,14 @@ public:
        return Master_full;
     }
 
+    double gammaSpin(int i) { 
+       if (gammaSvec.size() == S.nspins()) {
+	 return gammaSvec(i);
+       } else {
+	 return gammaS;
+       }
+    }
+  
     void update_jacobi_preconditioner(void) { 
       /***
        int matrix_size = SpinTupleInCavity::size(); 
@@ -304,7 +486,11 @@ public:
        for (int s = 0; s < S.nspins(); s++) { 
 	  int gamma_spin = gamma_cavity + 2 * s;
 	  int gamma_spin_up = gamma_spin + 1;
-	  std::get<Lrate>( lindblad_operators[gamma_spin] ) = gammaS;
+	  if (gammaSvec.size() == S.nspins()) {
+	     std::get<Lrate>( lindblad_operators[gamma_spin] ) = gammaSvec(s);
+	  } else {
+	     std::get<Lrate>( lindblad_operators[gamma_spin] ) = gammaS;
+	  }
 	  std::get<Lrate>( lindblad_operators[gamma_spin_up] ) = gammaSup;
        }
     }
@@ -497,6 +683,7 @@ public:
     MatrixXcd& rho(void) { return rho_matr; }
     complexg rho(int i, int j) { return rho_matr(i, j); } 
     double trId(void) { return real( rho_matr.trace() ); }
+    complexg trA(void) { return SpinTupleInCavity::trA(rho_matr); }
     double trN(void) { return SpinTupleInCavity::trN(rho_matr); }
     double trS2(void) { return SpinTupleInCavity::trS2(rho_matr); }
     double trSz(void) { return SpinTupleInCavity::trSz(rho_matr); }
@@ -505,12 +692,24 @@ public:
     double trSz(int s) { return SpinTupleInCavity::trSz(s, rho_matr); }
     double trSx(int s) { return SpinTupleInCavity::trSx(s, rho_matr); }
     double trSy(int s) { return SpinTupleInCavity::trSy(s, rho_matr); }
+    double trBell_spin_cavity(int s) { return SpinTupleInCavity::trBell_spin_cavity(s, rho_matr); }
+    double trBell_spin(int i, int j, const Vector3d &v1, const Vector3d &v2, const Vector3d &v3, const Vector3d &v4) {
+       return SpinTupleInCavity::trBell_spin(i, j, v1, v2, v3, v4, rho_matr);
+    }
+    double trBell_spin_random(int i, int j, int N) { return SpinTupleInCavity::trBell_spin_random(i, j, N, rho_matr); }
 
     void print_info(void) { 
        SpinTupleInCavity::print_info();
        std::cout << "# gamma " << gamma << std::endl;
        std::cout << "# nav " << nav << std::endl;
-       std::cout << "# gammaS " << gammaS << std::endl;
+	  if (gammaSvec.size() == S.nspins()) {
+	     for (int n = 0; n < S.nspins(); n++) { 
+	       std::cout << "# gammaS spin" << n << "  " << gammaSvec(n) << std::endl;
+	     }
+	  } else {
+	     std::cout << "# gammaS " << gammaS << std::endl;
+	  }
+       
        std::cout << "# gammaSup " << gammaSup << std::endl;
     }
     
@@ -559,7 +758,7 @@ public:
        return err;
     }
 
-    double find_rho_approx(void) {       
+    double find_rho_rate(int itermax, bool checkerr) {       
        MatrixXd Hfull(SpinTupleInCavity::size(), SpinTupleInCavity::size());
        Hfull = hamiltonian();
        
@@ -637,7 +836,7 @@ public:
        rho_next = rho0;
 
        double err;
-       for (int t = 0; t < 10; t++) {
+       for (int t = 0; t < itermax; t++) {
 	  double err_in = liouvillian().norm();
 	  std::cerr << "# liouvillian norm step " << t << " : " << err_in << std::endl;
 	  Lrho = evec.adjoint() * liouvillian_lindbladt(rho_next) * evec;
@@ -646,7 +845,7 @@ public:
 	  for (int i = 0; i < matrix_size; i++) { 
 	     for (int j = 0; j < matrix_size; j++) { 
 	        if (i != j) { 
-		   rho_next(i, j) = -iii * Lrho(i, j) / ( eval(i) - eval(j) );
+		   rho_next(i, j) = -iii * Lrho(i, j) / (eval(i) - eval(j));
 		} else { 
 		   rho_next(i, j) = 0;
 		}
@@ -663,6 +862,177 @@ public:
 	  VectorXd rhodiag;
 	  rhodiag = -K.bdcSvd(ComputeThinU | ComputeThinV).solve( Lrho.diagonal().real() );
 
+	  // at this stage rho_next has trace 0 
+	  for (int i = 0; i < matrix_size; i++) { 
+	     rho_next += rhodiag(i) * evec.col(i) * evec.col(i).adjoint();
+	  }       
+	  // we add rhodiag which gives a contribution of order \epsilon^n
+	  
+	  rho_next -= rho_next.trace() * rho0;
+	  // where does this come from ??? 
+	  // justification seems to be that if rho_next.trace() is of order \epsilon^n
+	  // lindbladt( rho_next.trace() * rho0 ) is of order \espilon^{n+1}
+	  // so we can use it as a counter term to fix the trace to 1 ...
+	  	  
+	  //	  std::cerr << "# error 2 L_lindblad rho_n + L_hamiltonian rho_{n+1} " << (liouvillian_hamiltonian(rho_next) + liouvillian_lindbladt(rho_n)).norm() << std::endl;
+
+	  Lrho = evec.adjoint() * liouvillian_lindbladt(rho_next) * evec;
+
+	  //	  std::cerr << "# error 2 diag L_lindblad rho_{n+1} " << Lrho.diagonal().norm() << std::endl;
+	  
+	  double err_out = liouvillian(rho_matr + rho_next).norm();
+	  
+	  if (err_out < err_in || !checkerr) { 
+	    rho_matr += rho_next;
+	    //	    rho_n = rho_next;
+	    err = err_out;
+	  } else { 
+	    err = err_in;
+	    break;
+	  }
+       }
+       return err;
+    }
+
+
+
+    double find_rho_rate2(int itermax, bool checkerr) {       
+       MatrixXd Hfull(SpinTupleInCavity::size(), SpinTupleInCavity::size());
+       Hfull = hamiltonian();
+       
+       MatrixXd evec;
+       VectorXd eval;
+       SelfAdjointEigenSolver<MatrixXd> eigensolver( Hfull);
+       if (eigensolver.info() != Success) abort();
+       eval = eigensolver.eigenvalues();
+       evec = eigensolver.eigenvectors();
+
+       int matrix_size = SpinTupleInCavity::size();
+       MatrixXd K(matrix_size, matrix_size);
+       MatrixXcd Kc(matrix_size, matrix_size);
+       K.setZero();      
+       Kc.setZero();
+       
+       VectorXcd Ln;
+       VectorXcd Lm;
+       //
+       // Kc(m, n) = evec.col(m).adjoint() * liouvillian_lindbladt( evec.col(m) * evec.col(n).adjoint() ) * evec.col(n)
+       // computation using the definition of lindbladt operators
+       // use K as a temporary for the calculation of Kc
+       for (int l = 0; l < number_of_lindblad_operators; l++) { 
+	  double gamma = std::get<Lrate>(lindblad_operators[l]);
+	  if (gamma == 0) continue;
+	  SparseMatrix< double > &lop = std::get<Lop>(lindblad_operators[l]);
+	  K = lop * evec;
+	  for (int n = 0; n < matrix_size; n++) {
+	     Ln = K.col(n);
+	     complexg Lnn = evec.col(n).adjoint() * Ln;
+	     complexg L2nn = evec.col(n).adjoint() * lop.adjoint() * Ln;
+	     for (int m = 0; m < matrix_size; m++) {
+	        Lm = K.col(m);
+	        complexg Lmm = evec.col(m).adjoint() * Lm;
+		complexg L2mm = evec.col(m).adjoint() * lop.adjoint() * Lm;
+
+		Kc(m, n) += gamma * Lmm * conj(Lnn);
+		Kc(m, n) -= gamma * 0.5 * L2nn;
+		Kc(m, n) -= gamma * 0.5 * L2mm;
+	     }
+	  }
+       }
+
+
+       //
+       // K(m, n) = evec.col(m).adjoin() * liouvillian_lindbladt( evec.col(n) * evec.col(n).adjoint() ) * evec.col(m)
+       // using the definition of lindbladt operators is more efficient 
+       //
+       K.setZero();      
+       for (int l = 0; l < number_of_lindblad_operators; l++) { 
+	  double gamma = std::get<Lrate>(lindblad_operators[l]);
+	  if (gamma == 0) continue;
+
+	  SparseMatrix< double > &lop = std::get<Lop>(lindblad_operators[l]);
+	  for (int n = 0; n < matrix_size; n++) {
+	     Ln = lop * evec.col(n);
+	     for (int m = 0; m < matrix_size; m++) {
+	        complexg Lmn = evec.col(m).adjoint() * Ln;
+		//	        complexg Lnm = Ln.adjoint() * evec.col(m);
+		K(m, n) += gamma * norm(Lmn);
+	     }
+	     K(n, n) -= gamma * Ln.squaredNorm();
+	  }
+       }
+
+       
+       //       VectorXd v1 = VectorXd::Constant(matrix_size, 1.0);
+       //       std::cerr << "# K error " << (K.transpose() * v1).norm() << std::endl;
+       MatrixXd ker = K.fullPivLu().kernel();
+       
+       if (ker.cols() > 1) { 
+	  std::cerr << "# kernel > 1 " << ker.cols() << std::endl;
+       }
+
+       VectorXd Kvec = ker.col(0) / ker.col(0).sum();
+
+       MatrixXcd rho0( matrix_size, matrix_size );
+       // 
+       // rho0 solves 
+       // L_hamiltonian rho0 = 0 
+       // P_{diag} L_lindblad rho0 = 0 
+       // Tr [ rho0 ] = 1 
+       //
+       rho0.setZero();
+       for (int i = 0; i < matrix_size; i++) { 
+	  rho0 += Kvec(i) * evec.col(i) * evec.col(i).adjoint();
+       }
+
+       MatrixXcd Lrho( matrix_size, matrix_size );
+
+       Lrho = evec.adjoint() * liouvillian_lindbladt(rho0) * evec;
+       std::cerr << "# error 1 diag L_lindblad rho0 " << Lrho.diagonal().norm() << std::endl;
+
+       rho_matr = rho0;
+
+       // equations to be solved iteratively are 
+       //
+       // L_lindblad rho_n + L_hamiltonian rho_{n+1} = 0
+       // P_{diag} L_lindblad rho_{n+1} = 0 
+       // Tr [ rho_{n+1} ] = 0 
+       //
+
+       //       MatrixXcd rho_n( matrix_size, matrix_size );
+       MatrixXcd rho_next( matrix_size, matrix_size );
+       MatrixXcd rho_next_evecbasis( matrix_size, matrix_size );
+       
+       rho_next = rho0;
+
+       double err;
+       for (int t = 0; t < itermax; t++) {
+	  double err_in = liouvillian().norm();
+	  std::cerr << "# liouvillian norm step " << t << " : " << err_in << std::endl;
+	  Lrho = evec.adjoint() * liouvillian_lindbladt(rho_next) * evec;
+	  rho_next_evecbasis = evec.adjoint() * rho_next * evec;
+	  
+	  //	  std::cerr << "# diagonal error " << Lrho.diagonal().norm() << std::endl;
+	  for (int i = 0; i < matrix_size; i++) { 
+	     for (int j = 0; j < matrix_size; j++) { 
+	        if (i != j) { 
+		   rho_next(i, j) = -(Lrho(i, j) - Kc(i, j) * rho_next_evecbasis(i, j) )/ ( -iii * (eval(i) - eval(j)) + Kc(i, j) );
+		} else { 
+		   rho_next(i, j) = 0;
+		}
+	     }
+	  }
+
+	  rho_next = evec * rho_next * evec.adjoint(); 
+	  // rho_n solves 
+	  // L_lindblad rho_n + L_hamiltonian rho_{n+1} = 0
+	  //	  std::cerr << "# error 1 L_lindblad rho_n + L_hamiltonian rho_{n+1} " << (liouvillian_hamiltonian(rho_next) + liouvillian_lindbladt(rho_n)).norm() << std::endl;
+	  
+	  Lrho = evec.adjoint() * liouvillian_lindbladt(rho_next) * evec;
+	  //	  std::cerr << "# error 1 diag L_lindblad rho_{n+1} " << Lrho.diagonal().norm() << std::endl;
+	  VectorXd rhodiag;
+	  rhodiag = -K.bdcSvd(ComputeThinU | ComputeThinV).solve( Lrho.diagonal().real() );
+	  
 	  for (int i = 0; i < matrix_size; i++) { 
 	     rho_next += rhodiag(i) * evec.col(i) * evec.col(i).adjoint();
 	  }       
@@ -677,7 +1047,7 @@ public:
 	  
 	  double err_out = liouvillian(rho_matr + rho_next).norm();
 	  
-	  if (err_out < err_in) { 
+	  if (err_out < err_in || !checkerr) { 
 	    rho_matr += rho_next;
 	    //	    rho_n = rho_next;
 	    err = err_out;
@@ -689,12 +1059,172 @@ public:
        return err;
     }
 
+
+    double find_rho_rate3(int itermax, bool checkerr) {       
+       MatrixXcd Hfull(SpinTupleInCavity::size(), SpinTupleInCavity::size());
+       Hfull = hamiltonian();
+       
+       MatrixXcd evec;
+       VectorXd eval;
+       SelfAdjointEigenSolver<MatrixXcd> eigensolver( Hfull);
+       if (eigensolver.info() != Success) abort();
+       eval = eigensolver.eigenvalues();
+       evec = eigensolver.eigenvectors();
+
+       int matrix_size = SpinTupleInCavity::size();
+       MatrixXd K(matrix_size, matrix_size);
+       MatrixXcd Kc(matrix_size, matrix_size);
+       MatrixXcd Ktmp(matrix_size, matrix_size);
+       MatrixXcd rho0( matrix_size, matrix_size );
+       
+       VectorXcd Ln;
+       VectorXcd Lm;
+
+       double err;
+       for (int t = 0; t < itermax; t++) {
+	  K.setZero();      
+	  Kc.setZero();
+
+	  //
+	  // Kc(m, n) = evec.col(m).adjoint() * liouvillian( evec.col(m) * evec.col(n).adjoint() ) * evec.col(n)
+	  // computation using the definition of lindbladt operators
+	  // use K as a temporary for the calculation of Kc
+	  for (int l = 0; l < number_of_lindblad_operators; l++) { 
+	     double gamma = std::get<Lrate>(lindblad_operators[l]);
+	     if (gamma == 0) continue;
+	     SparseMatrix< double > &lop = std::get<Lop>(lindblad_operators[l]);
+	     Ktmp = lop * evec;
+	     for (int n = 0; n < matrix_size; n++) {
+	        Ln = Ktmp.col(n);
+		complexg Lnn = evec.col(n).adjoint() * Ln;
+		complexg L2nn = evec.col(n).adjoint() * lop.adjoint() * Ln;
+		for (int m = 0; m < matrix_size; m++) {
+		   if (m == n) continue;
+
+		   Lm = Ktmp.col(m);
+		   complexg Lmm = evec.col(m).adjoint() * Lm;
+		   complexg L2mm = evec.col(m).adjoint() * lop.adjoint() * Lm;
+		   
+		   Kc(m, n) += gamma * Lmm * conj(Lnn);
+		   Kc(m, n) -= gamma * 0.5 * L2nn;
+		   Kc(m, n) -= gamma * 0.5 * L2mm;
+		}
+	     }
+	  }
+	  
+	  //
+	  // K(m, n) = evec.col(m).adjoin() * liouvillian_lindbladt( evec.col(n) * evec.col(n).adjoint() ) * evec.col(m)
+	  // using the definition of lindbladt operators is more efficient 
+	  //
+	  K.setZero();      
+	  for (int l = 0; l < number_of_lindblad_operators; l++) { 
+	     double gamma = std::get<Lrate>(lindblad_operators[l]);
+	     if (gamma == 0) continue;
+
+	     SparseMatrix< double > &lop = std::get<Lop>(lindblad_operators[l]);
+	     for (int n = 0; n < matrix_size; n++) {
+	       Ln = lop * evec.col(n);
+	       for (int m = 0; m < matrix_size; m++) {
+		 complexg Lmn = evec.col(m).adjoint() * Ln;
+		 //	        complexg Lnm = Ln.adjoint() * evec.col(m);
+		 K(m, n) += gamma * norm(Lmn);
+	       }
+	       K(n, n) -= gamma * Ln.squaredNorm();
+	     }
+	  }
+	  
+	  std::cerr << "# here " << std::endl;
+	  MatrixXd ker = K.fullPivLu().kernel();
+	  
+	  if (ker.cols() > 1) { 
+	    std::cerr << "# kernel > 1 " << ker.cols() << std::endl;
+	  }
+	  
+	  VectorXd Kvec = ker.col(0) / ker.col(0).sum();
+
+	  // 
+	  // rho0 solves 
+	  // L_hamiltonian rho0 = 0 
+	  // P_{diag} L_lindblad rho0 = 0 
+	  // Tr [ rho0 ] = 1 
+	  //
+	  rho0.setZero();
+	  for (int i = 0; i < matrix_size; i++) { 
+	    rho0 += Kvec(i) * evec.col(i) * evec.col(i).adjoint();
+	  }
+
+	  MatrixXcd Lrho( matrix_size, matrix_size );
+
+	  Lrho = evec.adjoint() * liouvillian(rho0) * evec;
+	  std::cerr << "# error 1 diag L_lindblad rho0 " << Lrho.diagonal().norm() << std::endl;
+
+	  rho_matr = rho0;
+
+	  MatrixXcd rho_next( matrix_size, matrix_size );
+	  double err_in = liouvillian().norm();
+	  std::cerr << "# liouvillian norm step " << t << " : " << err_in << std::endl;
+	  
+	  //	  std::cerr << "# diagonal error " << Lrho.diagonal().norm() << std::endl;
+	  for (int i = 0; i < matrix_size; i++) { 
+	     for (int j = 0; j < matrix_size; j++) { 
+	        if (i != j) { 
+		   rho_next(i, j) = -Lrho(i, j)/ ( -iii * (eval(i) - eval(j)) + Kc(i, j) );
+		} else { 
+		   rho_next(i, j) = 0;
+		}
+	     }
+	  }
+
+	  rho_next = evec * rho_next * evec.adjoint(); 
+	  // rho_n solves 
+	  // L_lindblad rho_n + L_hamiltonian rho_{n+1} = 0
+	  //	  std::cerr << "# error 1 L_lindblad rho_n + L_hamiltonian rho_{n+1} " << (liouvillian_hamiltonian(rho_next) + liouvillian_lindbladt(rho_n)).norm() << std::endl;
+	  
+	  Lrho = evec.adjoint() * liouvillian(rho_next) * evec;
+	  //	  std::cerr << "# error 1 diag L_lindblad rho_{n+1} " << Lrho.diagonal().norm() << std::endl;
+	  VectorXd rhodiag;
+	  rhodiag = -K.bdcSvd(ComputeThinU | ComputeThinV).solve( Lrho.diagonal().real() );
+	  
+	  for (int i = 0; i < matrix_size; i++) { 
+	     rho_next += rhodiag(i) * evec.col(i) * evec.col(i).adjoint();
+	  }       
+	  rho_matr = rho0 + rho_next - rho_next.trace() * rho0;
+	  double err_out = liouvillian(rho_matr).norm();
+	  std::cerr << "# liouvillian norm step " << t << " : " << err_out << std::endl;
+	  
+	  if (err_out < err_in || !checkerr) { 
+	    rho_matr += rho_next;
+	    //	    rho_n = rho_next;
+	    err = err_out;
+	  } else { 
+	    err = err_in;
+	    break;
+	  }
+
+	  SelfAdjointEigenSolver<MatrixXcd> esolver( rho_matr );
+	  if (esolver.info() != Success) abort();
+	  evec = esolver.eigenvectors();
+	  for (int n = 0; n < matrix_size; n++) {
+	     complexg Hnn = evec.col(n).adjoint() * Hfull * evec.col(n);
+	     eval(n) = real( Hnn );
+	  }
+	   
+       }
+       return err;
+    }
+
+  
+
+  
+    double find_rho_approx(int itermax, bool checkerr) { return find_rho_rate(itermax, checkerr); } 
+    double find_rho_approx(void) { return find_rho_approx(10, true); } 
+  
     typedef runge_kutta_dopri5<MatrixXcd, double, MatrixXcd, double,vector_space_algebra> Master_stepper;
 
     double find_rho_relaxation(void) { 
        int matrix_size = SpinTupleInCavity::size();
        Master_stepper master_stepper;
-       SpinTupleInCavityMasterTimeDerivative sict(*this);
+       SpinTupleInCavityMasterDt sict(*this);
        MatrixXcd rhot = rho_matr;
        MatrixXcd rho0( matrix_size, matrix_size );
        double DT = 1.0;
@@ -783,12 +1313,12 @@ public:
     }
 };
 
-void SpinTupleInCavityMasterTimeDerivative::operator() (const MatrixXcd &x , MatrixXcd &dxdt, double t) { 
+void SpinTupleInCavityMasterDt::operator() (const MatrixXcd &x , MatrixXcd &dxdt, double t) { 
    dxdt = spin_in_cavity.liouvillian(x);
 }
 
 
-main() { 
+int main_test(int argc, char **argv) { 
     double errmax = 1e-6;
     const static int NL = 70;
     std::vector<int> spin_size = { 2, 2 };
@@ -800,7 +1330,7 @@ main() {
        std::cout << "# Delta" << s << " " << Delta[s] << std::endl;
     }
     //    for (double domega = -0.1; domega <= 0.1; domega += 0.001) {
-    for (double domega = -0.2; domega <= 0.2; domega += 0.0033) {
+    for (double domega = -0.2; domega <= 0.2; domega += 0.0017) {
        for (int s = 0; s < sic.nspins(); s++) { 
 	  sic.Bz[s] = Delta[s] - domega;
 	  sic.Omega[s]  = 0.1;
@@ -828,14 +1358,16 @@ main() {
           sic.rho() = rho_prev;
           std::cerr << "# reset to rho_prev with error " << err_prev << " instead of " << err << std::endl;
        }
-       if (err > 1e-6) { 
+       if (err > errmax) { 
 	  err = sic.find_rho_approx_nondiag(1000, errmax);
        }
 
        if (first) { sic.print_info(); first = false; }
 
+       complexg alpha = sic.trA();
        std::cout << "# " << domega << "  ";
        std::cout << sic.trN() << "  " << sic.trSx() << "  " << sic.trSy() << "   " << sic.trSz() << "  " << sic.trS2() << "  ";
+       std::cout << real(alpha) << "   " << imag(alpha) << "   ";
        std::cout << err << "  ";
        for (int s = 0; s < sic.nspins(); s++) { 
 	  std::cout << sic.trSx(s) << "  " << sic.trSy(s) << "   " << sic.trSz(s) << "  ";
@@ -852,6 +1384,7 @@ main() {
        }
        std::cout << std::endl;
     }
+    return 0;
 }
 
 #endif

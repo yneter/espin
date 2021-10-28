@@ -158,6 +158,13 @@ public :
     const SpinMatrix& Sm(void) const { return sm; }
     const SpinMatrix& Id(void) const { return id; }
 
+    MatrixXcd Sxf(void) { return Sx(); } 
+    MatrixXcd Syf(void) { return Sy(); } 
+    MatrixXcd Spf(void) { return Sp(); } 
+    MatrixXcd Smf(void) { return Sm(); } 
+    MatrixXcd Szf(void) { return Sz(); } 
+    MatrixXcd Idf(void) { return Id(); } 
+
     int size(void) const { return matrix_size; }
 
     void resize(int N) { resize_matrix(N); init_matrix(); }
@@ -194,13 +201,13 @@ struct SpinHalfSparse : public SpinSparse {
    SpinHalfSparse() : SpinSparse(matrix_size) {  }
 };
 
-struct SpinTupleSparse { 
-    typedef SparseMatrix< complexg > SpinMatrix;
-    typedef SparseMatrix<double> SpinMatrixReal;
 
+template <class QuantSysSparse> struct QuantTupleSparse { 
+    typedef SparseMatrix< complexg > QuantSysMatrix;
+    typedef SparseMatrix<double> QuantSysMatrixReal;
 private:
+    std::vector< QuantSysSparse > Svec;
     int matrix_size;
-    std::vector< SpinSparse > Svec;
     int compute_size(void) { 
        int s = 1;
        for (int j = 0; j < Svec.size(); j++) { 
@@ -208,11 +215,11 @@ private:
        }
        return s;
     }
-    SpinMatrixReal rid;
-    SpinMatrixReal rzero;
-    SpinMatrix id;
-    SpinMatrix zero;
-   
+    QuantSysMatrixReal rid;
+    QuantSysMatrixReal rzero;
+    QuantSysMatrix id;
+    QuantSysMatrix zero;
+
     void resize_matrix(void) { 
        rid.resize(matrix_size, matrix_size);
        rid.setIdentity();
@@ -223,37 +230,42 @@ private:
        zero.resize(matrix_size, matrix_size);
        zero.setZero();
     }
-public :
+public:
     int size(void) const { return matrix_size; }
 
-    int nspins(void) const { return Svec.size(); }
+    int nsys(void) const { return Svec.size(); }
 
-    std::vector<int> spin_size_list(void) const { 
-       std::vector<int> ss( nspins() );
-       for (int j = 0; j < nspins(); j++) { 
+    const QuantSysMatrixReal& rId(void) const { return rid; } 
+    const QuantSysMatrixReal& rZero(void) const { return rzero; } 
+    const QuantSysMatrix& Id(void) const { return id; } 
+    const QuantSysMatrix& Zero(void) const { return zero; } 
+  
+    std::vector<int> quant_size_list(void) const { 
+       std::vector<int> ss( nsys() );
+       for (int j = 0; j < nsys(); j++) { 
 	  ss[j] = Svec[j].size();
        }
        return ss;
     }
 
-    void spin_size_list(const std::vector<int> &spins) { 
+    void quant_size_list(const std::vector<int> &spins) { 
        Svec.clear();
        for (int i = 0; i < spins.size(); i++) { 
-	  Svec.push_back( SpinSparse(spins[i]) );
+	  Svec.push_back( QuantSysSparse(spins[i]) );
        }
        matrix_size = compute_size();
        resize_matrix();
     }
 
-
-    SpinTupleSparse(void) { 
-
+  
+    QuantTupleSparse<QuantSysSparse>(void)
+    { 
     }
 
-    SpinTupleSparse(const std::vector<int> &spins) { 
-       spin_size_list(spins);
+    QuantTupleSparse<QuantSysSparse>(const std::vector<int> &vec) { 
+       quant_size_list(vec);
     } 
-
+  
     int find_left_matrix_size(int i) const { 
        int s = 1;
        for (int j = 0; j < i; j++) { 
@@ -266,21 +278,22 @@ public :
        return Svec[i].size();
     }
 
+
     template <typename Matrix> Matrix make_matrix_Hi(int i, const Matrix &Hi) const { 
        int size_left = find_left_matrix_size(i);
        int size_i = find_item_matrix_size(i);
        int size_right = matrix_size / (size_left * size_i);
 
-       SpinMatrixReal id_left(size_left, size_left);
+       QuantSysMatrixReal id_left(size_left, size_left);
        id_left.setIdentity();
-       SpinMatrixReal id_right(size_right, size_right);
+       QuantSysMatrixReal id_right(size_right, size_right);
        id_right.setIdentity();
 
        return kroneckerProduct(id_left, kroneckerProduct(Hi, id_right)).eval();
     } 
 
 
-    SpinMatrix make_matrix_HiHj(int I, SpinMatrix Hi, int J, SpinMatrix Hj ) const { 
+    QuantSysMatrix make_matrix_HiHj(int I, QuantSysMatrix Hi, int J, QuantSysMatrix Hj ) const { 
        int size_I_left = find_left_matrix_size(I);
        int size_I = find_item_matrix_size(I);
        int size_J_left = find_left_matrix_size(J);
@@ -288,11 +301,11 @@ public :
        int size_J_right = matrix_size / (size_J_left * size_J);
        int size_center = size_J_left / (size_I_left * size_I);
 
-       SpinMatrixReal id_left(size_I_left, size_I_left);
+       QuantSysMatrixReal id_left(size_I_left, size_I_left);
        id_left.setIdentity();
-       SpinMatrixReal id_right(size_J_right, size_J_right);
+       QuantSysMatrixReal id_right(size_J_right, size_J_right);
        id_right.setIdentity();
-       SpinMatrixReal id_center(size_center, size_center);
+       QuantSysMatrixReal id_center(size_center, size_center);
        id_center.setIdentity();
 
        return kroneckerProduct(id_left, 
@@ -302,24 +315,67 @@ public :
 								 ))).eval();
     }
 
-    SpinSparse &S(int i) { return Svec[i]; }
-    const SpinSparse &Sconst(int i) const { return Svec[i]; }
+    QuantSysSparse &quant_sys(int i) { return Svec[i]; }
+    const QuantSysSparse &quant_sys_const(int i) const { return Svec[i]; }
 
-    SpinMatrixReal rSx(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Svec[i].rSx()); }
-    SpinMatrixReal iSy(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Svec[i].iSy()); }
-    SpinMatrixReal rSz(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Svec[i].rSz()); }
-    SpinMatrixReal rSp(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Svec[i].rSp()); }
-    SpinMatrixReal rSm(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Svec[i].rSm()); }
-    SpinMatrix Sx(int i) const { return make_matrix_Hi<SpinMatrix>(i, Svec[i].Sx()); }
-    SpinMatrix Sy(int i) const { return make_matrix_Hi<SpinMatrix>(i, Svec[i].Sy()); }
-    SpinMatrix Sz(int i) const { return make_matrix_Hi<SpinMatrix>(i, Svec[i].Sz()); }
-    SpinMatrix Sp(int i) const { return make_matrix_Hi<SpinMatrix>(i, Svec[i].Sp()); }
-    SpinMatrix Sm(int i) const { return make_matrix_Hi<SpinMatrix>(i, Svec[i].Sm()); }
+    QuantSysSparse& operator=(const QuantSysSparse &S) { 
+       this->quant_size_list( S.quant_size_list() );
+       for (int s = 0; s < nsys(); s++) { 
+	  Svec[s] = S.Sconst(s);
+       }
+       return *this;
+    }  
+  
+};
 
-    const SpinMatrixReal& rId(void) const { return rid; } 
-    const SpinMatrixReal& rZero(void) const { return rzero; } 
-    const SpinMatrix& Id(void) const { return id; } 
-    const SpinMatrix& Zero(void) const { return zero; } 
+
+
+struct SpinTupleSparse : public QuantTupleSparse<SpinSparse> { 
+    typedef QuantTupleSparse<SpinSparse>::QuantSysMatrix SpinMatrix;
+    typedef QuantTupleSparse<SpinSparse>::QuantSysMatrixReal  SpinMatrixReal;
+private:
+    SpinMatrix Hfull;
+public : 
+
+    SpinTupleSparse(void) :  QuantTupleSparse<SpinSparse>()
+    { 
+    }
+
+    SpinTupleSparse(const std::vector<int> &vec) : QuantTupleSparse<SpinSparse>(vec) { 
+       Hfull.resize( size(), size() );
+    } 
+
+  
+    int nspins(void) const { return nsys(); }
+
+    std::vector<int> spin_size_list(void) const { 
+       return quant_size_list();
+    }
+
+    void spin_size_list(const std::vector<int> &spins) { 
+       quant_size_list(spins);
+    }
+
+    SpinSparse &S(int i) { return quant_sys(i); }
+    const SpinSparse &Sconst(int i) const { return quant_sys_const(i); }
+
+    SpinMatrixReal rSx(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Sconst(i).rSx()); }
+    SpinMatrixReal iSy(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Sconst(i).iSy()); }
+    SpinMatrixReal rSz(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Sconst(i).rSz()); }
+    SpinMatrixReal rSp(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Sconst(i).rSp()); }
+    SpinMatrixReal rSm(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Sconst(i).rSm()); }
+
+  SpinMatrix Sx(int i) const { return make_matrix_Hi<SpinMatrix>(i, Sconst(i).Sx()); }
+    SpinMatrix Sy(int i) const { return make_matrix_Hi<SpinMatrix>(i, Sconst(i).Sy()); }
+    SpinMatrix Sz(int i) const { return make_matrix_Hi<SpinMatrix>(i, Sconst(i).Sz()); }
+    SpinMatrix Sx2(int i) const { return make_matrix_Hi<SpinMatrix>(i, Sconst(i).Sx()*Sconst(i).Sx()); }
+    SpinMatrix Sy2(int i) const { return make_matrix_Hi<SpinMatrix>(i, Sconst(i).Sy()*Sconst(i).Sy()); }
+    SpinMatrix Sz2(int i) const { return make_matrix_Hi<SpinMatrix>(i, Sconst(i).Sz()*Sconst(i).Sz()); }
+    SpinMatrix Sp(int i) const { return make_matrix_Hi<SpinMatrix>(i, Sconst(i).Sp()); }
+    SpinMatrix Sm(int i) const { return make_matrix_Hi<SpinMatrix>(i, Sconst(i).Sm()); }
+    SpinMatrix Sp2(int i) const { return make_matrix_Hi<SpinMatrix>(i, Sconst(i).Sp()*Sconst(i).Sp()); }
+    SpinMatrix Sm2(int i) const { return make_matrix_Hi<SpinMatrix>(i, Sconst(i).Sm()*Sconst(i).Sm()); }
+  
     
     SpinMatrixReal rSx(void) const { SpinMatrixReal srSx = rZero(); for (int s = 0; s < nspins(); s++) srSx += rSx(s); return srSx; }
     SpinMatrixReal iSy(void) const { SpinMatrixReal siSy = rZero(); for (int s = 0; s < nspins(); s++) siSy += iSy(s); return siSy; }
@@ -327,16 +383,31 @@ public :
     SpinMatrix Sx(void) const { SpinMatrix sSx = Zero(); for (int s = 0; s < nspins(); s++) sSx += Sx(s); return sSx; }
     SpinMatrix Sy(void) const { SpinMatrix sSy = Zero(); for (int s = 0; s < nspins(); s++) sSy += Sy(s); return sSy; }
     SpinMatrix Sz(void) const { SpinMatrix sSz = Zero(); for (int s = 0; s < nspins(); s++) sSz += Sz(s); return sSz; }
+    SpinMatrix Id(void) const { return QuantTupleSparse<SpinSparse>::Id(); }
+
+    MatrixXcd Sxf(void) { return Sx(); } 
+    MatrixXcd Syf(void) { return Sy(); } 
+    MatrixXcd Szf(void) { return Sz(); } 
+    MatrixXcd Idf(void) { return QuantTupleSparse<SpinSparse>::Id(); } 
 
 
+    void load_uncoupled_hamiltonian(void) { 
+       Hfull.setZero();
+       for (int s = 0; s < nspins(); s++) {
+	  S(s).update_hamiltonian();
+	  Hfull += make_matrix_Hi<SpinMatrix>(s, S(s).hamiltonian() );
+       }       
+    }
 
-    SpinTupleSparse& operator=(const SpinTupleSparse &S) { 
-       this->spin_size_list( S.spin_size_list() );
-       for (int s = 0; s < nspins(); s++) { 
-	  Svec[s] = S.Sconst(s);
-       }
-       return *this;
-    }  
+    void update_hamiltonian(void) { 
+       load_uncoupled_hamiltonian();
+    }
+
+    const SpinMatrix& hamiltonian(void) const { 
+       return Hfull;
+    }
+    
+  
 };
 
 
