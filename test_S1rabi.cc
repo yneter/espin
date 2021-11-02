@@ -8,8 +8,7 @@ struct Spin1CavityRabi : public SpinCavityTuple {
    double omega;
    double Bac;
    // only a single triplet spin 
-   // Ncavity1 - number of states for oscillator 1 
-   // Ncavity2 - number of states for oscillator 2
+   // Ncavity - number of states for oscillator 
    Spin1CavityRabi(int Ncavity) : SpinCavityTuple( std::vector<int>( { 3 } ) ,
 						   std::vector<int>( { Ncavity } ) )
    {
@@ -56,20 +55,21 @@ int main(int argc, char **argv)
    SparseMatrix< std::complex<double> > H0 = s1a.hamiltonian();
 
    std::complex< double > sx01 = triplet.evec.col(1).adjoint() * triplet.S.Sx() * triplet.evec.col(0);
-   std::cout << "# sx01 " << s1a.Bac * abs(sx01) << std::endl; // Rabi frequency 
+   double rabi_frequency = s1a.Bac * abs(sx01);
+   std::cout << "# sx01 " << rabi_frequency << std::endl; // Rabi frequency 
 
-   s1a.os.cavity(0).omega_c = s1a.Bac * abs(sx01);    // frequency of first cavity set equal to Rabi frequency    
+   s1a.os.cavity(0).omega_c = atof(argv[1]) * rabi_frequency;    // frequency of first cavity set equal to Rabi frequency    
    s1a.lambda = 0.0;   
-   s1a.sigma = s1a.os.cavity(0).omega_c;      // coupling strength 
+   s1a.sigma = 0.1 * s1a.os.cavity(0).omega_c;      // coupling strength 
    s1a.update_hamiltonian();
    
    typedef runge_kutta_dopri5<VectorXcd, double, VectorXcd, double,vector_space_algebra> H_stepper;
    H_stepper hstep;
 
    VectorXcd psi0(s1a.size());
-   psi0 = etensor( VectorXcd () = triplet.evec.col(0) , s1a.os.cavity(0).vac_n(0) );
+   psi0 = espin_tensor( VectorXcd () = triplet.evec.col(0) , s1a.os.cavity(0).vac_n(0) );
    VectorXcd psi1(s1a.size());
-   psi1 = etensor( VectorXcd () = triplet.evec.col(1) , s1a.os.cavity(0).vac_n(0) );
+   psi1 = espin_tensor( VectorXcd () = triplet.evec.col(1) , s1a.os.cavity(0).vac_n(0) );
 
    
    double DT = 0.1;

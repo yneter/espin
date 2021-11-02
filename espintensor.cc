@@ -160,7 +160,7 @@ public :
 };
 
 
-VectorXcd espintensor(std::vector< std::reference_wrapper< VectorXcd > > &vlist)  {   
+VectorXcd espin_tensor(std::vector< std::reference_wrapper< VectorXcd > > &vlist)  {   
   VectorXcd tmp;
   if (vlist.size() == 1) tmp = vlist[0];
   if (vlist.size() >= 2) {
@@ -172,24 +172,24 @@ VectorXcd espintensor(std::vector< std::reference_wrapper< VectorXcd > > &vlist)
   return tmp;
 }
 
-VectorXcd espintensor(std::vector< std::reference_wrapper< VectorXcd > > &vlist, VectorXcd &v) { 
+VectorXcd espin_tensor(std::vector< std::reference_wrapper< VectorXcd > > &vlist, VectorXcd &v) { 
    vlist.push_back(v);
-   return espintensor(vlist);
+   return espin_tensor(vlist);
 }
   
-template<typename... Args> VectorXcd espintensor(std::vector< std::reference_wrapper< VectorXcd > > &vlist, VectorXcd &v, Args... args) { 
+template<typename... Args> VectorXcd espin_tensor(std::vector< std::reference_wrapper< VectorXcd > > &vlist, VectorXcd &v, Args... args) { 
    vlist.push_back(v);
-   return espintensor(vlist, args...);
+   return espin_tensor(vlist, args...);
 }
   
-template<typename... Args> VectorXcd espintensor(VectorXcd &v, Args... args) { 
+template<typename... Args> VectorXcd espin_tensor(VectorXcd &v, Args... args) { 
    std::vector< std::reference_wrapper< VectorXcd > > vlist;
    vlist.push_back(v);
-   return espintensor(vlist, args...);
+   return espin_tensor(vlist, args...);
 }
 
 
-int main_test_espintensor()
+int main_test_espin_tensor()
 {
   eSpinSparseTensor a;
   std::vector<int> adim = { 11, 8, 23 };
@@ -216,7 +216,7 @@ int main_test_tensor()
    a << 1, 2;
    VectorXcd b(2);
    b << 1, 3;
-   std::cout << espintensor(a, b, a) << std::endl;
+   std::cout << espin_tensor(a, b, a) << std::endl;
    return 0;
 }
 #endif
