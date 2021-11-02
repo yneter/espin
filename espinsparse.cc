@@ -325,7 +325,6 @@ public:
        }
        return *this;
     }  
-  
 };
 
 
@@ -365,7 +364,7 @@ public :
     SpinMatrixReal rSp(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Sconst(i).rSp()); }
     SpinMatrixReal rSm(int i) const { return make_matrix_Hi<SpinMatrixReal>(i, Sconst(i).rSm()); }
 
-  SpinMatrix Sx(int i) const { return make_matrix_Hi<SpinMatrix>(i, Sconst(i).Sx()); }
+    SpinMatrix Sx(int i) const { return make_matrix_Hi<SpinMatrix>(i, Sconst(i).Sx()); }
     SpinMatrix Sy(int i) const { return make_matrix_Hi<SpinMatrix>(i, Sconst(i).Sy()); }
     SpinMatrix Sz(int i) const { return make_matrix_Hi<SpinMatrix>(i, Sconst(i).Sz()); }
     SpinMatrix Sx2(int i) const { return make_matrix_Hi<SpinMatrix>(i, Sconst(i).Sx()*Sconst(i).Sx()); }

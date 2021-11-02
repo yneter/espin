@@ -82,6 +82,13 @@ public :
        return c;
     }
 
+    VectorXcd vac_n(int n) { 
+	VectorXcd v( size() );
+	v.setZero();
+	v(0) = 1;
+	return v;
+    }
+  
     VectorXcd coherent(double alphax, double alphay) { 
        std::complex<double> alpha(alphax, alphay);
        return coherent(alpha);
@@ -316,11 +323,28 @@ struct SpinCavityTuple  {
 private :
     SparseMatrix<complexg> Hfull;
 public : 
+  typedef SparseMatrix< std::complex<double> > SpinCavityTupleMatrix;
 
     SpinCavityTuple(std::vector<int> spins, std::vector<int> cavities) : S(spins), os(cavities) {        
        Hfull.resize( size(), size() );
     }
+    SpinCavityTupleMatrix Sx(int i) const { return kroneckerProduct(S.Sx(i), os.Id()); }
+    SpinCavityTupleMatrix Sy(int i) const { return kroneckerProduct(S.Sy(i), os.Id()); }
+    SpinCavityTupleMatrix Sz(int i) const { return kroneckerProduct(S.Sz(i), os.Id()); }
+    SpinCavityTupleMatrix Sx2(int i) const { return kroneckerProduct(S.Sx2(i), os.Id()); }
+    SpinCavityTupleMatrix Sy2(int i) const { return kroneckerProduct(S.Sy2(i), os.Id()); }
+    SpinCavityTupleMatrix Sz2(int i) const { return kroneckerProduct(S.Sz2(i), os.Id()); }
+    SpinCavityTupleMatrix N(int i) const { return kroneckerProduct(S.Id(), os.N(i)); }
 
+    double trSx(int i, const VectorXcd &psi) { return real( std::complex<double>( psi.adjoint() * Sx(i) * psi) ); }
+    double trSy(int i, const VectorXcd &psi) { return real( std::complex<double>( psi.adjoint() * Sy(i) * psi) ); }
+    double trSz(int i, const VectorXcd &psi) { return real( std::complex<double>( psi.adjoint() * Sz(i) * psi) ); }
+    double trSx2(int i, const VectorXcd &psi) { return real( std::complex<double>( psi.adjoint() * Sx2(i) * psi) ); }
+    double trSy2(int i, const VectorXcd &psi) { return real( std::complex<double>( psi.adjoint() * Sy2(i) * psi) ); }
+    double trSz2(int i, const VectorXcd &psi) { return real( std::complex<double>( psi.adjoint() * Sz2(i) * psi) ); }
+    double trN(int i, const VectorXcd &psi) { return real( std::complex<double>( psi.adjoint() * N(i) * psi) ); }
+
+  
     void update_hamiltonian(void) {
        S.update_hamiltonian();
        os.update_hamiltonian();
@@ -330,6 +354,7 @@ public :
     SparseMatrix<complexg> &hamiltonian(void) { 
        return Hfull; 
     }
+
 };
 
 struct SpinTupleInCavityMaster;

@@ -428,7 +428,8 @@ public:
        return Hfull;
     }
 
-    template <class Spin2> GenericSpin<Pauli>& operator=(const GenericSpin<Spin2> & S) { 
+  //    template <class Spin2> GenericSpin<Pauli>& operator=(const GenericSpin<Spin2> & S) {
+    template <class Spin2> GenericSpin<Pauli>& operator=(const Spin2 & S) {   
        this->D = S.D;
        this->E = S.E;
        this->rot = S.rot;
@@ -438,12 +439,14 @@ public:
        return *this;
     }  
 
+
 };
 
 
 typedef GenericSpin<PauliQuintetMatrices> QuintetSpin;
 typedef GenericSpin<PauliTripletMatrices> TripletSpin;
 typedef GenericSpin<PauliDoubletMatrices> SpinHalf;
+
 typedef GenericSpin<Spin0p5Matrix> Spin0p5;
 typedef GenericSpin<Spin1Matrix> Spin1;
 typedef GenericSpin<Spin1p5Matrix> Spin1p5;
@@ -663,6 +666,16 @@ public :
 
 };
 
+typedef SingleSpin<Spin0p5>  SingleSpin0p5;
+typedef SingleSpin<Spin1>  SingleSpin1;
+typedef SingleSpin<Spin1p5>  SingleSpin1p5;
+typedef SingleSpin<Spin2>  SingleSpin2;
+typedef SingleSpin<Spin2p5>  SingleSpin2p5;
+typedef SingleSpin<Spin3>  SingleSpin3;
+typedef SingleSpin<Spin3p5>  SingleSpin3p5;
+typedef SingleSpin<Spin4>  SingleSpin4;
+typedef SingleSpin<Spin4p5>  SingleSpin4p5;
+typedef SingleSpin<Spin5>  SingleSpin5;
 
 class SingleTriplet : public SingleSpin<TripletSpin> { 
 public : 
