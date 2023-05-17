@@ -7,9 +7,9 @@ using namespace std;
 
 int main() 
 {
-   SpinPair<Spin3, Spin2p5> sp;
+   SpinPair<Spin1, Spin2> sp;
    double s = 0.0;
-   for (double D = 0.3; D <= 1.5; D += 1e-5) { 
+   for (double D = 0.3; D <= 1.5; D += 1e-4) { 
      sp.S1.D = D;
      sp.S2.D = 1.2;
      sp.S1.B << 0.2, 0.4, 0.9;

@@ -33,7 +33,7 @@ struct Spin0p5Matrix {
     const SpinMatrixReal& Id(void) const { return rid; }
 };
 const Spin0p5Matrix::SpinMatrixReal Spin0p5Matrix::rsx ( ( (SpinMatrixReal() <<  0, 1./2., 1./2., 0).finished() ) );
-const Spin0p5Matrix::SpinMatrixReal Spin0p5Matrix::isy ( ( (SpinMatrixReal() <<  0, - 1./2., 1./2., 0).finished() ) );
+const Spin0p5Matrix::SpinMatrixReal Spin0p5Matrix::isy ( ( (SpinMatrixReal() <<  0, 1./2., -1./2., 0).finished() ) );
 const Spin0p5Matrix::SpinMatrixReal Spin0p5Matrix::rsz ( ( (SpinMatrixReal() <<  1./2., 0, 0, -1./2.).finished() ) );
 const Spin0p5Matrix::SpinMatrixReal Spin0p5Matrix::rid (  (SpinMatrixReal() = SpinMatrixReal::Identity()) );
 const Spin0p5Matrix::SpinMatrixReal Spin0p5Matrix::rsp (  (SpinMatrixReal() = Spin0p5Matrix::rsx + Spin0p5Matrix::isy) );
@@ -66,7 +66,7 @@ struct Spin1Matrix {
     const SpinMatrixReal& Id(void) const { return rid; }
 };
 const Spin1Matrix::SpinMatrixReal Spin1Matrix::rsx ( ( (SpinMatrixReal() <<  0, sqrt(1./2.), 0, sqrt(1./2.), 0, sqrt(1./2.), 0, sqrt(1./2.), 0).finished() ) );
-const Spin1Matrix::SpinMatrixReal Spin1Matrix::isy ( ( (SpinMatrixReal() <<  0, - sqrt(1./2.), 0, sqrt(1./2.), 0, - sqrt(1./2.), 0, sqrt(1./2.), 0).finished() ) );
+const Spin1Matrix::SpinMatrixReal Spin1Matrix::isy ( ( (SpinMatrixReal() <<  0, sqrt(1./2.), 0, -sqrt(1./2.), 0, sqrt(1./2.), 0, -sqrt(1./2.), 0).finished() ) );
 const Spin1Matrix::SpinMatrixReal Spin1Matrix::rsz ( ( (SpinMatrixReal() <<  1, 0, 0, 0, 0, 0, 0, 0, -1).finished() ) );
 const Spin1Matrix::SpinMatrixReal Spin1Matrix::rid (  (SpinMatrixReal() = SpinMatrixReal::Identity()) );
 const Spin1Matrix::SpinMatrixReal Spin1Matrix::rsp (  (SpinMatrixReal() = Spin1Matrix::rsx + Spin1Matrix::isy) );
@@ -99,7 +99,7 @@ struct Spin1p5Matrix {
     const SpinMatrixReal& Id(void) const { return rid; }
 };
 const Spin1p5Matrix::SpinMatrixReal Spin1p5Matrix::rsx ( ( (SpinMatrixReal() <<  0, sqrt(3.)/2., 0, 0, sqrt(3.)/2., 0, 1., 0, 0, 1., 0, sqrt(3.)/2., 0, 0, sqrt(3.)/2., 0).finished() ) );
-const Spin1p5Matrix::SpinMatrixReal Spin1p5Matrix::isy ( ( (SpinMatrixReal() <<  0, - sqrt(3.)/2., 0, 0, sqrt(3.)/2., 0, - 1., 0, 0, 1., 0, - sqrt(3.)/2., 0, 0, sqrt(3.)/2., 0).finished() ) );
+const Spin1p5Matrix::SpinMatrixReal Spin1p5Matrix::isy ( ( (SpinMatrixReal() <<  0, sqrt(3.)/2., 0, 0, -sqrt(3.)/2., 0, 1., 0, 0, -1., 0, sqrt(3.)/2., 0, 0, -sqrt(3.)/2., 0).finished() ) );
 const Spin1p5Matrix::SpinMatrixReal Spin1p5Matrix::rsz ( ( (SpinMatrixReal() <<  3./2., 0, 0, 0, 0, 1./2., 0, 0, 0, 0, -1./2., 0, 0, 0, 0, -3./2.).finished() ) );
 const Spin1p5Matrix::SpinMatrixReal Spin1p5Matrix::rid (  (SpinMatrixReal() = SpinMatrixReal::Identity()) );
 const Spin1p5Matrix::SpinMatrixReal Spin1p5Matrix::rsp (  (SpinMatrixReal() = Spin1p5Matrix::rsx + Spin1p5Matrix::isy) );
@@ -132,7 +132,7 @@ struct Spin2Matrix {
     const SpinMatrixReal& Id(void) const { return rid; }
 };
 const Spin2Matrix::SpinMatrixReal Spin2Matrix::rsx ( ( (SpinMatrixReal() <<  0, 1., 0, 0, 0, 1., 0, sqrt(3./2.), 0, 0, 0, sqrt(3./2.), 0, sqrt(3./2.), 0, 0, 0, sqrt(3./2.), 0, 1., 0, 0, 0, 1., 0).finished() ) );
-const Spin2Matrix::SpinMatrixReal Spin2Matrix::isy ( ( (SpinMatrixReal() <<  0, - 1., 0, 0, 0, 1., 0, - sqrt(3./2.), 0, 0, 0, sqrt(3./2.), 0, - sqrt(3./2.), 0, 0, 0, sqrt(3./2.), 0, - 1., 0, 0, 0, 1., 0).finished() ) );
+const Spin2Matrix::SpinMatrixReal Spin2Matrix::isy ( ( (SpinMatrixReal() <<  0, 1., 0, 0, 0, -1., 0, sqrt(3./2.), 0, 0, 0, -sqrt(3./2.), 0, sqrt(3./2.), 0, 0, 0, -sqrt(3./2.), 0, 1., 0, 0, 0, -1., 0).finished() ) );
 const Spin2Matrix::SpinMatrixReal Spin2Matrix::rsz ( ( (SpinMatrixReal() <<  2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, -2).finished() ) );
 const Spin2Matrix::SpinMatrixReal Spin2Matrix::rid (  (SpinMatrixReal() = SpinMatrixReal::Identity()) );
 const Spin2Matrix::SpinMatrixReal Spin2Matrix::rsp (  (SpinMatrixReal() = Spin2Matrix::rsx + Spin2Matrix::isy) );
@@ -165,7 +165,7 @@ struct Spin2p5Matrix {
     const SpinMatrixReal& Id(void) const { return rid; }
 };
 const Spin2p5Matrix::SpinMatrixReal Spin2p5Matrix::rsx ( ( (SpinMatrixReal() <<  0, sqrt(5.)/2., 0, 0, 0, 0, sqrt(5.)/2., 0, sqrt(8.)/2., 0, 0, 0, 0, sqrt(8.)/2., 0, 3./2., 0, 0, 0, 0, 3./2., 0, sqrt(8.)/2., 0, 0, 0, 0, sqrt(8.)/2., 0, sqrt(5.)/2., 0, 0, 0, 0, sqrt(5.)/2., 0).finished() ) );
-const Spin2p5Matrix::SpinMatrixReal Spin2p5Matrix::isy ( ( (SpinMatrixReal() <<  0, - sqrt(5.)/2., 0, 0, 0, 0, sqrt(5.)/2., 0, - sqrt(8.)/2., 0, 0, 0, 0, sqrt(8.)/2., 0, - 3./2., 0, 0, 0, 0, 3./2., 0, - sqrt(8.)/2., 0, 0, 0, 0, sqrt(8.)/2., 0, - sqrt(5.)/2., 0, 0, 0, 0, sqrt(5.)/2., 0).finished() ) );
+const Spin2p5Matrix::SpinMatrixReal Spin2p5Matrix::isy ( ( (SpinMatrixReal() <<  0, sqrt(5.)/2., 0, 0, 0, 0, -sqrt(5.)/2., 0, sqrt(8.)/2., 0, 0, 0, 0, -sqrt(8.)/2., 0, 3./2., 0, 0, 0, 0, -3./2., 0, sqrt(8.)/2., 0, 0, 0, 0, -sqrt(8.)/2., 0, sqrt(5.)/2., 0, 0, 0, 0, -sqrt(5.)/2., 0).finished() ) );
 const Spin2p5Matrix::SpinMatrixReal Spin2p5Matrix::rsz ( ( (SpinMatrixReal() <<  5./2., 0, 0, 0, 0, 0, 0, 3./2., 0, 0, 0, 0, 0, 0, 1./2., 0, 0, 0, 0, 0, 0, -1./2., 0, 0, 0, 0, 0, 0, -3./2., 0, 0, 0, 0, 0, 0, -5./2.).finished() ) );
 const Spin2p5Matrix::SpinMatrixReal Spin2p5Matrix::rid (  (SpinMatrixReal() = SpinMatrixReal::Identity()) );
 const Spin2p5Matrix::SpinMatrixReal Spin2p5Matrix::rsp (  (SpinMatrixReal() = Spin2p5Matrix::rsx + Spin2p5Matrix::isy) );
@@ -198,7 +198,7 @@ struct Spin3Matrix {
     const SpinMatrixReal& Id(void) const { return rid; }
 };
 const Spin3Matrix::SpinMatrixReal Spin3Matrix::rsx ( ( (SpinMatrixReal() <<  0, sqrt(3./2.), 0, 0, 0, 0, 0, sqrt(3./2.), 0, sqrt(5./2.), 0, 0, 0, 0, 0, sqrt(5./2.), 0, sqrt(6./2.), 0, 0, 0, 0, 0, sqrt(6./2.), 0, sqrt(6./2.), 0, 0, 0, 0, 0, sqrt(6./2.), 0, sqrt(5./2.), 0, 0, 0, 0, 0, sqrt(5./2.), 0, sqrt(3./2.), 0, 0, 0, 0, 0, sqrt(3./2.), 0).finished() ) );
-const Spin3Matrix::SpinMatrixReal Spin3Matrix::isy ( ( (SpinMatrixReal() <<  0, - sqrt(3./2.), 0, 0, 0, 0, 0, sqrt(3./2.), 0, - sqrt(5./2.), 0, 0, 0, 0, 0, sqrt(5./2.), 0, - sqrt(6./2.), 0, 0, 0, 0, 0, sqrt(6./2.), 0, - sqrt(6./2.), 0, 0, 0, 0, 0, sqrt(6./2.), 0, - sqrt(5./2.), 0, 0, 0, 0, 0, sqrt(5./2.), 0, - sqrt(3./2.), 0, 0, 0, 0, 0, sqrt(3./2.), 0).finished() ) );
+const Spin3Matrix::SpinMatrixReal Spin3Matrix::isy ( ( (SpinMatrixReal() <<  0, sqrt(3./2.), 0, 0, 0, 0, 0, -sqrt(3./2.), 0, sqrt(5./2.), 0, 0, 0, 0, 0, -sqrt(5./2.), 0, sqrt(6./2.), 0, 0, 0, 0, 0, -sqrt(6./2.), 0, sqrt(6./2.), 0, 0, 0, 0, 0, -sqrt(6./2.), 0, sqrt(5./2.), 0, 0, 0, 0, 0, -sqrt(5./2.), 0, sqrt(3./2.), 0, 0, 0, 0, 0, -sqrt(3./2.), 0).finished() ) );
 const Spin3Matrix::SpinMatrixReal Spin3Matrix::rsz ( ( (SpinMatrixReal() <<  3, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, -3).finished() ) );
 const Spin3Matrix::SpinMatrixReal Spin3Matrix::rid (  (SpinMatrixReal() = SpinMatrixReal::Identity()) );
 const Spin3Matrix::SpinMatrixReal Spin3Matrix::rsp (  (SpinMatrixReal() = Spin3Matrix::rsx + Spin3Matrix::isy) );
@@ -231,7 +231,7 @@ struct Spin3p5Matrix {
     const SpinMatrixReal& Id(void) const { return rid; }
 };
 const Spin3p5Matrix::SpinMatrixReal Spin3p5Matrix::rsx ( ( (SpinMatrixReal() <<  0, sqrt(7.)/2., 0, 0, 0, 0, 0, 0, sqrt(7.)/2., 0, sqrt(12.)/2., 0, 0, 0, 0, 0, 0, sqrt(12.)/2., 0, sqrt(15.)/2., 0, 0, 0, 0, 0, 0, sqrt(15.)/2., 0, 2., 0, 0, 0, 0, 0, 0, 2., 0, sqrt(15.)/2., 0, 0, 0, 0, 0, 0, sqrt(15.)/2., 0, sqrt(12.)/2., 0, 0, 0, 0, 0, 0, sqrt(12.)/2., 0, sqrt(7.)/2., 0, 0, 0, 0, 0, 0, sqrt(7.)/2., 0).finished() ) );
-const Spin3p5Matrix::SpinMatrixReal Spin3p5Matrix::isy ( ( (SpinMatrixReal() <<  0, - sqrt(7.)/2., 0, 0, 0, 0, 0, 0, sqrt(7.)/2., 0, - sqrt(12.)/2., 0, 0, 0, 0, 0, 0, sqrt(12.)/2., 0, - sqrt(15.)/2., 0, 0, 0, 0, 0, 0, sqrt(15.)/2., 0, - 2., 0, 0, 0, 0, 0, 0, 2., 0, - sqrt(15.)/2., 0, 0, 0, 0, 0, 0, sqrt(15.)/2., 0, - sqrt(12.)/2., 0, 0, 0, 0, 0, 0, sqrt(12.)/2., 0, - sqrt(7.)/2., 0, 0, 0, 0, 0, 0, sqrt(7.)/2., 0).finished() ) );
+const Spin3p5Matrix::SpinMatrixReal Spin3p5Matrix::isy ( ( (SpinMatrixReal() <<  0, sqrt(7.)/2., 0, 0, 0, 0, 0, 0, -sqrt(7.)/2., 0, sqrt(12.)/2., 0, 0, 0, 0, 0, 0, -sqrt(12.)/2., 0, sqrt(15.)/2., 0, 0, 0, 0, 0, 0, -sqrt(15.)/2., 0, 2., 0, 0, 0, 0, 0, 0, -2., 0, sqrt(15.)/2., 0, 0, 0, 0, 0, 0, -sqrt(15.)/2., 0, sqrt(12.)/2., 0, 0, 0, 0, 0, 0, -sqrt(12.)/2., 0, sqrt(7.)/2., 0, 0, 0, 0, 0, 0, -sqrt(7.)/2., 0).finished() ) );
 const Spin3p5Matrix::SpinMatrixReal Spin3p5Matrix::rsz ( ( (SpinMatrixReal() <<  7./2., 0, 0, 0, 0, 0, 0, 0, 0, 5./2., 0, 0, 0, 0, 0, 0, 0, 0, 3./2., 0, 0, 0, 0, 0, 0, 0, 0, 1./2., 0, 0, 0, 0, 0, 0, 0, 0, -1./2., 0, 0, 0, 0, 0, 0, 0, 0, -3./2., 0, 0, 0, 0, 0, 0, 0, 0, -5./2., 0, 0, 0, 0, 0, 0, 0, 0, -7./2.).finished() ) );
 const Spin3p5Matrix::SpinMatrixReal Spin3p5Matrix::rid (  (SpinMatrixReal() = SpinMatrixReal::Identity()) );
 const Spin3p5Matrix::SpinMatrixReal Spin3p5Matrix::rsp (  (SpinMatrixReal() = Spin3p5Matrix::rsx + Spin3p5Matrix::isy) );
@@ -264,7 +264,7 @@ struct Spin4Matrix {
     const SpinMatrixReal& Id(void) const { return rid; }
 };
 const Spin4Matrix::SpinMatrixReal Spin4Matrix::rsx ( ( (SpinMatrixReal() <<  0, sqrt(4./2.), 0, 0, 0, 0, 0, 0, 0, sqrt(4./2.), 0, sqrt(7./2.), 0, 0, 0, 0, 0, 0, 0, sqrt(7./2.), 0, sqrt(9./2.), 0, 0, 0, 0, 0, 0, 0, sqrt(9./2.), 0, sqrt(10./2.), 0, 0, 0, 0, 0, 0, 0, sqrt(10./2.), 0, sqrt(10./2.), 0, 0, 0, 0, 0, 0, 0, sqrt(10./2.), 0, sqrt(9./2.), 0, 0, 0, 0, 0, 0, 0, sqrt(9./2.), 0, sqrt(7./2.), 0, 0, 0, 0, 0, 0, 0, sqrt(7./2.), 0, sqrt(4./2.), 0, 0, 0, 0, 0, 0, 0, sqrt(4./2.), 0).finished() ) );
-const Spin4Matrix::SpinMatrixReal Spin4Matrix::isy ( ( (SpinMatrixReal() <<  0, - sqrt(4./2.), 0, 0, 0, 0, 0, 0, 0, sqrt(4./2.), 0, - sqrt(7./2.), 0, 0, 0, 0, 0, 0, 0, sqrt(7./2.), 0, - sqrt(9./2.), 0, 0, 0, 0, 0, 0, 0, sqrt(9./2.), 0, - sqrt(10./2.), 0, 0, 0, 0, 0, 0, 0, sqrt(10./2.), 0, - sqrt(10./2.), 0, 0, 0, 0, 0, 0, 0, sqrt(10./2.), 0, - sqrt(9./2.), 0, 0, 0, 0, 0, 0, 0, sqrt(9./2.), 0, - sqrt(7./2.), 0, 0, 0, 0, 0, 0, 0, sqrt(7./2.), 0, - sqrt(4./2.), 0, 0, 0, 0, 0, 0, 0, sqrt(4./2.), 0).finished() ) );
+const Spin4Matrix::SpinMatrixReal Spin4Matrix::isy ( ( (SpinMatrixReal() <<  0, sqrt(4./2.), 0, 0, 0, 0, 0, 0, 0, -sqrt(4./2.), 0, sqrt(7./2.), 0, 0, 0, 0, 0, 0, 0, -sqrt(7./2.), 0, sqrt(9./2.), 0, 0, 0, 0, 0, 0, 0, -sqrt(9./2.), 0, sqrt(10./2.), 0, 0, 0, 0, 0, 0, 0, -sqrt(10./2.), 0, sqrt(10./2.), 0, 0, 0, 0, 0, 0, 0, -sqrt(10./2.), 0, sqrt(9./2.), 0, 0, 0, 0, 0, 0, 0, -sqrt(9./2.), 0, sqrt(7./2.), 0, 0, 0, 0, 0, 0, 0, -sqrt(7./2.), 0, sqrt(4./2.), 0, 0, 0, 0, 0, 0, 0, -sqrt(4./2.), 0).finished() ) );
 const Spin4Matrix::SpinMatrixReal Spin4Matrix::rsz ( ( (SpinMatrixReal() <<  4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, -3, 0, 0, 0, 0, 0, 0, 0, 0, 0, -4).finished() ) );
 const Spin4Matrix::SpinMatrixReal Spin4Matrix::rid (  (SpinMatrixReal() = SpinMatrixReal::Identity()) );
 const Spin4Matrix::SpinMatrixReal Spin4Matrix::rsp (  (SpinMatrixReal() = Spin4Matrix::rsx + Spin4Matrix::isy) );
@@ -297,7 +297,7 @@ struct Spin4p5Matrix {
     const SpinMatrixReal& Id(void) const { return rid; }
 };
 const Spin4p5Matrix::SpinMatrixReal Spin4p5Matrix::rsx ( ( (SpinMatrixReal() <<  0, 3./2., 0, 0, 0, 0, 0, 0, 0, 0, 3./2., 0, 2., 0, 0, 0, 0, 0, 0, 0, 0, 2., 0, sqrt(21.)/2., 0, 0, 0, 0, 0, 0, 0, 0, sqrt(21.)/2., 0, sqrt(24.)/2., 0, 0, 0, 0, 0, 0, 0, 0, sqrt(24.)/2., 0, 5./2., 0, 0, 0, 0, 0, 0, 0, 0, 5./2., 0, sqrt(24.)/2., 0, 0, 0, 0, 0, 0, 0, 0, sqrt(24.)/2., 0, sqrt(21.)/2., 0, 0, 0, 0, 0, 0, 0, 0, sqrt(21.)/2., 0, 2., 0, 0, 0, 0, 0, 0, 0, 0, 2., 0, 3./2., 0, 0, 0, 0, 0, 0, 0, 0, 3./2., 0).finished() ) );
-const Spin4p5Matrix::SpinMatrixReal Spin4p5Matrix::isy ( ( (SpinMatrixReal() <<  0, - 3./2., 0, 0, 0, 0, 0, 0, 0, 0, 3./2., 0, - 2., 0, 0, 0, 0, 0, 0, 0, 0, 2., 0, - sqrt(21.)/2., 0, 0, 0, 0, 0, 0, 0, 0, sqrt(21.)/2., 0, - sqrt(24.)/2., 0, 0, 0, 0, 0, 0, 0, 0, sqrt(24.)/2., 0, - 5./2., 0, 0, 0, 0, 0, 0, 0, 0, 5./2., 0, - sqrt(24.)/2., 0, 0, 0, 0, 0, 0, 0, 0, sqrt(24.)/2., 0, - sqrt(21.)/2., 0, 0, 0, 0, 0, 0, 0, 0, sqrt(21.)/2., 0, - 2., 0, 0, 0, 0, 0, 0, 0, 0, 2., 0, - 3./2., 0, 0, 0, 0, 0, 0, 0, 0, 3./2., 0).finished() ) );
+const Spin4p5Matrix::SpinMatrixReal Spin4p5Matrix::isy ( ( (SpinMatrixReal() <<  0, 3./2., 0, 0, 0, 0, 0, 0, 0, 0, -3./2., 0, 2., 0, 0, 0, 0, 0, 0, 0, 0, -2., 0, sqrt(21.)/2., 0, 0, 0, 0, 0, 0, 0, 0, -sqrt(21.)/2., 0, sqrt(24.)/2., 0, 0, 0, 0, 0, 0, 0, 0, -sqrt(24.)/2., 0, 5./2., 0, 0, 0, 0, 0, 0, 0, 0, -5./2., 0, sqrt(24.)/2., 0, 0, 0, 0, 0, 0, 0, 0, -sqrt(24.)/2., 0, sqrt(21.)/2., 0, 0, 0, 0, 0, 0, 0, 0, -sqrt(21.)/2., 0, 2., 0, 0, 0, 0, 0, 0, 0, 0, -2., 0, 3./2., 0, 0, 0, 0, 0, 0, 0, 0, -3./2., 0).finished() ) );
 const Spin4p5Matrix::SpinMatrixReal Spin4p5Matrix::rsz ( ( (SpinMatrixReal() <<  9./2., 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7./2., 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5./2., 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3./2., 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1./2., 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1./2., 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -3./2., 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -5./2., 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -7./2., 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -9./2.).finished() ) );
 const Spin4p5Matrix::SpinMatrixReal Spin4p5Matrix::rid (  (SpinMatrixReal() = SpinMatrixReal::Identity()) );
 const Spin4p5Matrix::SpinMatrixReal Spin4p5Matrix::rsp (  (SpinMatrixReal() = Spin4p5Matrix::rsx + Spin4p5Matrix::isy) );
@@ -330,7 +330,7 @@ struct Spin5Matrix {
     const SpinMatrixReal& Id(void) const { return rid; }
 };
 const Spin5Matrix::SpinMatrixReal Spin5Matrix::rsx ( ( (SpinMatrixReal() <<  0, sqrt(5./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(5./2.), 0, sqrt(9./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(9./2.), 0, sqrt(12./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(12./2.), 0, sqrt(14./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(14./2.), 0, sqrt(15./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(15./2.), 0, sqrt(15./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(15./2.), 0, sqrt(14./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(14./2.), 0, sqrt(12./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(12./2.), 0, sqrt(9./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(9./2.), 0, sqrt(5./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(5./2.), 0).finished() ) );
-const Spin5Matrix::SpinMatrixReal Spin5Matrix::isy ( ( (SpinMatrixReal() <<  0, - sqrt(5./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(5./2.), 0, - sqrt(9./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(9./2.), 0, - sqrt(12./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(12./2.), 0, - sqrt(14./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(14./2.), 0, - sqrt(15./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(15./2.), 0, - sqrt(15./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(15./2.), 0, - sqrt(14./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(14./2.), 0, - sqrt(12./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(12./2.), 0, - sqrt(9./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(9./2.), 0, - sqrt(5./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, sqrt(5./2.), 0).finished() ) );
+const Spin5Matrix::SpinMatrixReal Spin5Matrix::isy ( ( (SpinMatrixReal() <<  0, sqrt(5./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, -sqrt(5./2.), 0, sqrt(9./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, -sqrt(9./2.), 0, sqrt(12./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, -sqrt(12./2.), 0, sqrt(14./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, -sqrt(14./2.), 0, sqrt(15./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, -sqrt(15./2.), 0, sqrt(15./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, -sqrt(15./2.), 0, sqrt(14./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, -sqrt(14./2.), 0, sqrt(12./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, -sqrt(12./2.), 0, sqrt(9./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, -sqrt(9./2.), 0, sqrt(5./2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, -sqrt(5./2.), 0).finished() ) );
 const Spin5Matrix::SpinMatrixReal Spin5Matrix::rsz ( ( (SpinMatrixReal() <<  5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -5).finished() ) );
 const Spin5Matrix::SpinMatrixReal Spin5Matrix::rid (  (SpinMatrixReal() = SpinMatrixReal::Identity()) );
 const Spin5Matrix::SpinMatrixReal Spin5Matrix::rsp (  (SpinMatrixReal() = Spin5Matrix::rsx + Spin5Matrix::isy) );
@@ -383,7 +383,6 @@ struct GenericSpinBase {
     virtual const TransferSpinMatrix Sz_gen(void) const = 0;
     virtual const TransferSpinMatrix Id_gen(void) const = 0;
 
-
 };
 
 
@@ -397,16 +396,30 @@ public:
 
 
     const SpinMatrix& update_hamiltonian(void) { 
-       Matrix3d r_matrix = rot.matrix();
-       SpinMatrix rotSx = r_matrix(0, 0) * Pauli::rsx - (iii * r_matrix(0, 1)) * Pauli::isy + r_matrix(0, 2) * Pauli::rsz;
-       SpinMatrix rotSy = r_matrix(1, 0) * Pauli::rsx - (iii * r_matrix(1, 1)) * Pauli::isy + r_matrix(1, 2) * Pauli::rsz;
-       SpinMatrix rotSz = r_matrix(2, 0) * Pauli::rsx - (iii * r_matrix(2, 1)) * Pauli::isy + r_matrix(2, 2) * Pauli::rsz;
-       Vector3d rBvec = r_matrix * B;
+       SpinMatrix rotSx = rot.matrix(0, 0) * Pauli::rsx - (iii * rot.matrix(0, 1)) * Pauli::isy + rot.matrix(0, 2) * Pauli::rsz;
+       SpinMatrix rotSy = rot.matrix(1, 0) * Pauli::rsx - (iii * rot.matrix(1, 1)) * Pauli::isy + rot.matrix(1, 2) * Pauli::rsz;
+       SpinMatrix rotSz = rot.matrix(2, 0) * Pauli::rsx - (iii * rot.matrix(2, 1)) * Pauli::isy + rot.matrix(2, 2) * Pauli::rsz;
+       Vector3d rBvec = rot.matrix() * B;
        Hfull = D * (rotSz * rotSz - 2.0*Pauli::id/3.0) + E * (rotSx * rotSx -  rotSy * rotSy) 
 	   + g3[0] * rotSx * rBvec[0] + g3[1] * rotSy * rBvec[1] + g3[2] * rotSz * rBvec[2];
        return Hfull;
     }
 
+    const SpinMatrix Sx_mol(void) const  { return rot.matrix(0, 0)*Pauli::rsx - (iii*rot.matrix(0, 1))*Pauli::isy + rot.matrix(0, 2)*Pauli::rsz; }
+    const SpinMatrix Sy_mol(void) const { return rot.matrix(1, 0)*Pauli::rsx - (iii*rot.matrix(1, 1))*Pauli::isy + rot.matrix(1, 2)*Pauli::rsz; }
+    const SpinMatrix Sz_mol(void) const  { return rot.matrix(2, 0)*Pauli::rsx - (iii*rot.matrix(2, 1))*Pauli::isy + rot.matrix(2, 2)*Pauli::rsz; }
+    const SpinMatrix Sx2_mol(void) const  { return Sx_mol() * Sx_mol(); }
+    const SpinMatrix Sy2_mol(void) const  { return Sy_mol() * Sy_mol(); }
+    const SpinMatrix Sz2_mol(void) const  { return Sz_mol() * Sz_mol(); }
+    const SpinMatrix Sx(void) const { return Pauli::rsx; }
+    const SpinMatrix Sy(void) const  { return -iii*Pauli::isy; }
+    const SpinMatrix Sz(void) const { return Pauli::rsz; }
+    const SpinMatrix Id(void) const { return Pauli::id; }
+
+    void g(double isotropic_g) { 
+       g3 << isotropic_g, isotropic_g, isotropic_g;
+    }
+  
     const SpinMatrix& hamiltonian(void) const { 
        return Hfull;
     }
@@ -428,6 +441,9 @@ public:
        return Hfull;
     }
 
+    Matrix3d fine_structure_tensor(void) { 
+       return rot.matrix().transpose() *  (Vector3d() << E-D/3.0, -E-D/3.0, 2.0*D/3.0).finished().asDiagonal() * rot.matrix();    
+    }
   //    template <class Spin2> GenericSpin<Pauli>& operator=(const GenericSpin<Spin2> & S) {
     template <class Spin2> GenericSpin<Pauli>& operator=(const Spin2 & S) {   
        this->D = S.D;
@@ -440,17 +456,28 @@ public:
     }  
 
 
+    void fine_structure_tensor(Matrix3d T) { 
+       SelfAdjointEigenSolver<Matrix3d> eigensolver(T);
+       Vector3d eval;
+       Matrix3d evec;
+       eval = eigensolver.eigenvalues();
+       evec = eigensolver.eigenvectors();
+       D = eval(2) - (eval(0) + eval(1))/2.0;
+       E = (eval(1) - eval(0))/2.0;
+       rot = evec.transpose();  
+    }
+  
 };
 
 
-typedef GenericSpin<PauliQuintetMatrices> QuintetSpin;
-typedef GenericSpin<PauliTripletMatrices> TripletSpin;
-typedef GenericSpin<PauliDoubletMatrices> SpinHalf;
 
 typedef GenericSpin<Spin0p5Matrix> Spin0p5;
+typedef GenericSpin<Spin0p5Matrix> SpinHalf;
 typedef GenericSpin<Spin1Matrix> Spin1;
+typedef GenericSpin<Spin1Matrix> TripletSpin;
 typedef GenericSpin<Spin1p5Matrix> Spin1p5;
 typedef GenericSpin<Spin2Matrix> Spin2;
+typedef GenericSpin<Spin2Matrix> QuintetSpin;
 typedef GenericSpin<Spin2p5Matrix> Spin2p5;
 typedef GenericSpin<Spin3Matrix> Spin3;
 typedef GenericSpin<Spin3p5Matrix> Spin3p5;
@@ -464,6 +491,7 @@ template <class Spin1> class SingleSpin {
 public:
     Spin1 S;
     typedef Matrix<complexg, Spin1::matrix_size, Spin1::matrix_size> SpinMatrix;
+    typedef Matrix<double, Spin1::matrix_size, Spin1::matrix_size> SpinMatrixReal;
     typedef Matrix<complexg, Spin1::matrix_size, 1> SpinVector;
     typedef Matrix<double, Spin1::matrix_size, 1> SpinVectorReal;
 
@@ -492,8 +520,15 @@ public:
        evec = eigensolver.eigenvectors();
     }
 
+    void diag_real(void) { 
+       SelfAdjointEigenSolver<SpinMatrixReal> eigensolver( S.hamiltonian().real() );
+       if (eigensolver.info() != Success) abort();
+       eval = eigensolver.eigenvalues();
+       evec = eigensolver.eigenvectors();
+    }
+
     void diag_eval_only(void) { 
-       SelfAdjointEigenSolver<SpinMatrix> eigensolver( S.hamiltonian() );
+       SelfAdjointEigenSolver<SpinMatrix> eigensolver( S.hamiltonian(), EigenvaluesOnly );
        if (eigensolver.info() != Success) abort();
        eval = eigensolver.eigenvalues();
     }
@@ -511,6 +546,19 @@ public:
     SpinMatrix Sz(void) { 
        return S.Sz();
     }
+    complexg Sx(int n, int m) { 
+       return evec.col(n).adjoint() * Sx() * evec.col(m);
+    }
+
+    complexg Sy(int n, int m) { 
+       return evec.col(n).adjoint() * Sy() * evec.col(m);
+    }
+
+    complexg Sz(int n, int m) { 
+       return evec.col(n).adjoint() * Sz() * evec.col(m);
+    }
+
+  
 
 };
 
@@ -581,6 +629,13 @@ public :
        evec = eigensolver.eigenvectors();
     }
 
+    void diag_real(void) { 
+       SelfAdjointEigenSolver<SpinMatrixReal> eigensolver( Hfull.real() );
+       if (eigensolver.info() != Success) abort();
+       eval = eigensolver.eigenvalues();
+       evec = eigensolver.eigenvectors();
+    }
+  
     void diag_eval_only(void) { 
        SelfAdjointEigenSolver<SpinMatrix> eigensolver(Hfull);
        if (eigensolver.info() != Success) abort();
@@ -606,46 +661,61 @@ public :
        return kroneckerProduct(S1.sx, S2.id).eval() + kroneckerProduct(S1.id, S2.sx).eval();
     }
 
-    SpinMatrix Sx(void) { 
+    const SpinMatrix Sx(void) const { 
        return kroneckerProduct(S1.sx, S2.id).eval() + kroneckerProduct(S1.id, S2.sx).eval();
     }
-    SpinMatrix Sy(void) { 
+    const SpinMatrix Sy(void) const { 
        return kroneckerProduct(S1.sy, S2.id).eval() + kroneckerProduct(S1.id, S2.sy).eval();
     }
-    SpinMatrix Sz(void) { 
+    const SpinMatrix Sz(void) const { 
        return kroneckerProduct(S1.sz, S2.id).eval() + kroneckerProduct(S1.id, S2.sz).eval();
     }
+
     SpinMatrix S2tot(void) { return Sx()*Sx() + Sy()*Sy() + Sz()*Sz(); }
 
-    SpinMatrix Sx(int s) { 
+
+    const SpinMatrix Sx(int s) const { 
        if (!s) return kroneckerProduct(S1.sx, S2.id);
        else return  kroneckerProduct(S1.id, S2.sx);
     }
-    SpinMatrix Sy(int s) { 
+    const SpinMatrix Sy(int s) const { 
        if (!s) return kroneckerProduct(S1.sy, S2.id);
        else return  kroneckerProduct(S1.id, S2.sy);
     }
-    SpinMatrix Sz(int s) { 
+    const SpinMatrix Sz(int s) const { 
        if (!s) return kroneckerProduct(S1.sz, S2.id);
        else return  kroneckerProduct(S1.id, S2.sz);
     }
 
+    const SpinMatrix Sx_rot(const Rotation &rot) const  { return rot.matrix(0, 0)*Sx() + rot.matrix(0, 1) * Sy() + rot.matrix(0, 2)*Sz(); }
+    const SpinMatrix Sy_rot(const Rotation &rot) const  { return rot.matrix(1, 0)*Sx() + rot.matrix(1, 1) * Sy() + rot.matrix(1, 2)*Sz(); }
+    const SpinMatrix Sz_rot(const Rotation &rot) const  { return rot.matrix(2, 0)*Sx() + rot.matrix(2, 1) * Sy() + rot.matrix(2, 2)*Sz(); }
+    const SpinMatrix Sx_rot(const Rotation &rot, int s) const  { return rot.matrix(0, 0)*Sx(s) + rot.matrix(0, 1) * Sy(s) + rot.matrix(0, 2)*Sz(s); }
+    const SpinMatrix Sy_rot(const Rotation &rot, int s) const  { return rot.matrix(1, 0)*Sx(s) + rot.matrix(1, 1) * Sy(s) + rot.matrix(1, 2)*Sz(s); }
+    const SpinMatrix Sz_rot(const Rotation &rot, int s) const  { return rot.matrix(2, 0)*Sx(s) + rot.matrix(2, 1) * Sy(s) + rot.matrix(2, 2)*Sz(s); }
+  
+    const SpinMatrix Sx_mol1(void) const { return Sx_rot(S1.rot); }
+    const SpinMatrix Sy_mol1(void) const { return Sy_rot(S1.rot); }
+    const SpinMatrix Sz_mol1(void) const { return Sz_rot(S1.rot); }
+    const SpinMatrix Sx_mol2(void) const { return Sx_rot(S2.rot); }
+    const SpinMatrix Sy_mol2(void) const { return Sy_rot(S2.rot); }
+    const SpinMatrix Sz_mol2(void) const { return Sz_rot(S2.rot); }
 
-    complexg Sx(int n, int m) { 
-       return evec.col(n).adjoint() * Sx() * evec.col(m);
-    }
-
-    complexg Sy(int n, int m) { 
-       return evec.col(n).adjoint() * Sy() * evec.col(m);
-    }
-
-    complexg Sz(int n, int m) { 
-       return evec.col(n).adjoint() * Sz() * evec.col(m);
-    }
-
-    complexg S2tot(int n, int m) { 
-       return evec.col(n).adjoint() * S2tot() * evec.col(m);
-    }
+    const SpinMatrix Sx1_mol(void) const { return Sx_rot(S1.rot, 0); }
+    const SpinMatrix Sy1_mol(void) const { return Sy_rot(S1.rot, 0); }
+    const SpinMatrix Sz1_mol(void) const { return Sz_rot(S1.rot, 0); }
+    const SpinMatrix Sx2_mol(void) const { return Sx_rot(S2.rot, 1); }
+    const SpinMatrix Sy2_mol(void) const { return Sy_rot(S2.rot, 1); }
+    const SpinMatrix Sz2_mol(void) const { return Sz_rot(S2.rot, 1); }
+ 
+      
+    const complexg Sx(int n, int m) const { return evec.col(n).adjoint() * Sx() * evec.col(m); }
+    const complexg Sy(int n, int m) const { return evec.col(n).adjoint() * Sy() * evec.col(m); }
+    const complexg Sz(int n, int m) const { return evec.col(n).adjoint() * Sz() * evec.col(m); }
+    complexg Sx2(int n, int m) { return evec.col(n).adjoint() * Sx() * Sx() * evec.col(m); }
+    complexg Sy2(int n, int m) { return evec.col(n).adjoint() * Sy() * Sy() * evec.col(m); }
+    complexg Sz2(int n, int m) { return evec.col(n).adjoint() * Sz() * Sz() * evec.col(m); }
+    complexg S2tot(int n, int m) { return evec.col(n).adjoint() * S2tot() * evec.col(m); }
   
     complexg Perm(int n, int m) { 
        complexg Psum = 0;
@@ -716,19 +786,19 @@ public :
     }
 
 
-    double quintet_content(int i) {
+    const double quintet_content(int i) const {
        Matrix<complexg, 5, 1> iProj = Jproj.block(4, 0, 5, 9) * evec.block(0, i, 9, 1);
        Matrix<complexg, 1, 1> norm2 = iProj.adjoint() * iProj;
        return real(norm2(0));
     }
 
-    double triplet_content(int i) {
+    const double triplet_content(int i) const {
        Matrix<complexg, 3, 1> iProj = Jproj.block(1, 0, 3, 9) * evec.block(0, i, 9, 1);
        Matrix<complexg, 1, 1> norm2 = iProj.adjoint() * iProj;
        return real(norm2(0));
     }
 
-    double singlet_content(int i) {
+    const double singlet_content(int i) const {
        Matrix<complexg, 1, 1> iProj = Jproj.block(0, 0, 1, 9) * evec.block(0, i, 9, 1);
        Matrix<complexg, 1, 1> norm2 = iProj.adjoint() * iProj;
        return real(norm2(0));
@@ -757,6 +827,51 @@ const TripletPair::SpinMatrix TripletPair::Jproj (
 						    0, 0, si6(), 0, s2i3(), 0, si6(), 0, 0,
 						    0, si2(), 0, si2(), 0, 0, 0, 0, 0,
 						    1.0, 0, 0, 0, 0, 0, 0, 0, 0 ).finished()
+						    );
+
+
+
+
+class SpinHalfPair : public SpinPair<SpinHalf, SpinHalf> {
+private: 
+    static const double si2(void)  { return 1.0/sqrt(2.0); }
+
+public : 
+    static const SpinMatrix Jproj;
+    SpinHalfPair(void) 
+    {
+    }
+
+    const double triplet_content(int i) const {
+       Matrix<complexg, 3, 1> iProj = Jproj.block(1, 0, 3, 4) * evec.block(0, i, 4, 1);
+       Matrix<complexg, 1, 1> norm2 = iProj.adjoint() * iProj;
+       return real(norm2(0));
+    }
+
+    const double singlet_content(int i) const {
+       Matrix<complexg, 1, 1> iProj = Jproj.block(0, 0, 1, 9) * evec.block(0, i, 9, 1);
+       Matrix<complexg, 1, 1> norm2 = iProj.adjoint() * iProj;
+       return real(norm2(0));
+    }
+
+    static const SpinVector singlet(void) { 
+       return Jproj.row(0).adjoint();
+    }
+    static const SpinMatrix singlet_projector(void) { 
+       return Jproj.row(0).adjoint() * Jproj.row(0);
+    }
+
+    static const SpinVector singlet_wavefunction(void) { 
+       return Jproj.col(0);
+    }
+};
+
+
+const SpinHalfPair::SpinMatrix SpinHalfPair::Jproj ( 
+						   (SpinMatrix() << 0, si2(), -si2(), 0, 
+						    0, 0, 0, 1., 
+						    0, si2(), si2(), 0,
+						    1.0, 0, 0, 0 ).finished()
 						    );
 
 

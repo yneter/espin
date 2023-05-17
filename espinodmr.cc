@@ -104,6 +104,21 @@ public:
        return c1;
     }    
 
+    complexg sq(complexg x) { return x*x; } 
+  
+    complexg dchi1_domega(double omega) { 
+       complexg c1 = 0.0;
+       for (int m = 0; m < spins.matrix_size ; m++) { 
+	  for (int n = 0; n < spins.matrix_size ; n++) { 
+	     // 
+	     // the contribution to chi1 vanishes for n == m, whether gamma is the same for diagonal and non diagonal elements is not relvant here 
+	     // 
+	     c1 -= (rho0(m) - rho0(n)) * norm(Vx(n, m)) / sq( omega_nm(n, m) - omega - iii * gamma );
+	  }
+       }
+       return c1;
+    }    
+  
 };
 
 

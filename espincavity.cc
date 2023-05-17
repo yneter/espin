@@ -18,7 +18,8 @@ private :
 
 public :
     double omega_c;
-
+    double Fx;
+  
     CavitySparse(int N) : 
       a_matrix(N, N),
       ap_matrix(N, N),
@@ -26,7 +27,8 @@ public :
       Id_matrix(N, N),
       Hfull(N, N)
     { 
-      std::vector< Triplet<ecavity_float> > coef;      
+       Fx = 0;
+       std::vector< Triplet<ecavity_float> > coef;      
        for (int i = 0; i < N-1; i++) { 
 	 coef.push_back( Triplet<ecavity_float>( i, i+1, static_cast<ecavity_float>(sqrt(i+1)) ) );
        }
@@ -85,7 +87,7 @@ public :
     VectorXcd vac_n(int n) { 
 	VectorXcd v( size() );
 	v.setZero();
-	v(0) = 1;
+	v(n) = 1;
 	return v;
     }
   
@@ -99,7 +101,7 @@ public :
     }
 
     void update_hamiltonian(void) { 
-       Hfull = omega_c * N_matrix;
+       Hfull = omega_c * N_matrix + Fx * (a_matrix + ap_matrix);
     }
 
     const SparseMatrix<double>& hamiltonian(void) const { 

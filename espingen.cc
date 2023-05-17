@@ -82,10 +82,14 @@ class Rotation {
 
 public : 
 
-    const Matrix3d &matrix(void) {
+    const Matrix3d &matrix(void) const {
        return M;
     }
 
+    const double matrix(int i, int j) const { 
+       return M(i, j);
+    }
+  
     const Matrix3d &matrix(const Matrix3d &Mnew) {
        init_from_matrix(Mnew);
        return M;

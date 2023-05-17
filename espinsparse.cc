@@ -167,6 +167,14 @@ public :
 
     int size(void) const { return matrix_size; }
 
+    VectorXcd spin_n(int n) {
+	VectorXcd v( size() );
+	v.setZero();
+	v(n) = 1;
+	return v;
+    } 
+
+
     void resize(int N) { resize_matrix(N); init_matrix(); }
 
     const SpinMatrix& update_hamiltonian(void) { 

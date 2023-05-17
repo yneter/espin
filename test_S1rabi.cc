@@ -18,8 +18,9 @@ struct Spin1CavityRabi : public SpinCavityTuple {
 
    void update_hamiltonian(void) { 
       SpinCavityTuple::update_hamiltonian();
-      SpinCavityTuple::hamiltonian() += lambda * kroneckerProduct( S.Sx(0), os.a(0) + os.ap(0) ).eval(); // Sx (a + a^+) 
+      SpinCavityTuple::hamiltonian() += lambda * kroneckerProduct( S.Sx(0), os.a(0) + os.ap(0) ).eval(); // Sx (a + a^+)
       SpinCavityTuple::hamiltonian() += sigma * kroneckerProduct( S.Sz2(0), os.a(0) + os.ap(0) ).eval(); // Sz^2 (b + b^+)
+      //      SpinCavityTuple::hamiltonian() += sigma * kroneckerProduct( S.Sz(0), os.a(0) + os.ap(0) ).eval(); // Sz^2 (b + b^+)      
    }
 
    SparseMatrix<complexg> hamiltonian(double time) { 
@@ -59,8 +60,12 @@ int main(int argc, char **argv)
    std::cout << "# sx01 " << rabi_frequency << std::endl; // Rabi frequency 
 
    s1a.os.cavity(0).omega_c = atof(argv[1]) * rabi_frequency;    // frequency of first cavity set equal to Rabi frequency    
+   // Sz^2 coupling 
    s1a.lambda = 0.0;   
    s1a.sigma = 0.1 * s1a.os.cavity(0).omega_c;      // coupling strength 
+   // Sx coupling 
+   //   s1a.sigma = 0.0;   
+   //   s1a.lambda = 0.1 * s1a.os.cavity(0).omega_c;      // coupling strength 
    s1a.update_hamiltonian();
    
    typedef runge_kutta_dopri5<VectorXcd, double, VectorXcd, double,vector_space_algebra> H_stepper;
@@ -83,9 +88,9 @@ int main(int argc, char **argv)
 		<< "   " << real( std::complex<double> ( psi0.adjoint() * H0 * psi0 ) )
 		<< "   " << real( std::complex<double> ( psi1.adjoint() * H0 * psi1 ) )
 		<< "   " << real( std::complex<double> ( psi1.adjoint() * psi0 )  )
-		<< "   " << s1a.trSz(0, psi0) << "    " << s1a.trSz2(0, psi0) << "    "
-		<< "   " << s1a.trN(0, psi0) << "   " << psi0.norm()-1. 
-		<< "   " << s1a.trN(0, psi1) << "   " << psi1.norm()-1. << std::endl;
+		<< "   " << s1a.trSz(0, psi0) << "   " << s1a.trSz2(0, psi0) << "    "
+		<< "   " << s1a.trN(0, psi0)  << "   " << psi0.norm()-1. 
+		<< "   " << s1a.trN(0, psi1)  << "   " << psi1.norm()-1. << std::endl;
       t += DT;
    }
 }
